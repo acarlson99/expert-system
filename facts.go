@@ -2,12 +2,12 @@ package main
 
 import "fmt"
 
-type Fact int
+type Fact byte
 
 const (
-	F Fact = 0
-	T Fact = 1
-	U Fact = 2
+	F Fact = 'F'
+	T Fact = 'T'
+	U Fact = 'U'
 )
 
 type Facts struct {
@@ -23,7 +23,7 @@ func (t Fact) String() string {
 	case U:
 		return "U"
 	}
-	panic(t)
+	panic(fmt.Sprintf("Invalid value for fact: '%c'", t))
 }
 
 func NewFacts() Facts {
