@@ -1,28 +1,43 @@
-package lexer
+package main
 
 import (
+	"fmt"
 	"io"
+	"strings"
 )
 
-type Lexeme string
-
 const (
-	LParen   Lexeme = "("
-	RParen   Lexeme = ")"
-	Not      Lexeme = "!"
-	And      Lexeme = "+"
-	Or       Lexeme = "|"
-	Xor      Lexeme = "^"
-	Implies  Lexeme = "=>"
-	IfOnlyIf Lexeme = "<=>"
+	LLParen   string = "("
+	LRParen   string = ")"
+	LNot      string = "!"
+	LAnd      string = "+"
+	LOr       string = "|"
+	LXor      string = "^"
+	LImply    string = "=>"
+	LIfOnlyIf string = "<=>"
+	LFact     string = "="
+	LQuery    string = "?"
 )
 
 type Token struct {
-	lexeme Lexeme
+	lexeme string
 	lineno int
 	column int
 }
 
-func Read(Reader reader) ([]Token, err) {
-	// TODO: implement :3
+func Read(reader io.Reader) ([]Token, error) {
+	const siz = 256
+	buf := make([]byte, siz)
+	for {
+		_, err := reader.Read(buf)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			break // TODO: return io error
+		}
+		str := strings.Split(string(buf[:siz]), "#")[0] // strip comments
+		fmt.Println(str)
+	}
+	return nil, fmt.Errorf("TODO")
 }

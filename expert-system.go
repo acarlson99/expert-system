@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"os"
+)
 
 func main() {
-	fmt.Println("Expert System")
+	Read(os.Stdin)
 }
