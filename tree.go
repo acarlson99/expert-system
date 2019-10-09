@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 type TreeNode interface {
-	Evaluate() bool
+	Evaluate() (bool, error)
 	String() string
 }
 
@@ -13,19 +13,29 @@ type Value struct {
 	next TreeNode
 }
 
-func (v *Value) Evaluate() bool {
+func (v *Value) Evaluate() (bool, error) {
 	facts := GetFacts()
 
 	if v.next != nil {
-		truth := v.next.Evaluate()
-		facts.Set(v.ch, truth)
+		truth, err := v.next.Evaluate()
+		if err != nil {
+			return false, err // TODO: address error
+		}
+		if set, _ := facts.IsSet(v.ch); !set {
+			facts.Set(v.ch, truth)
+		} else {
+			factVal, _ := facts.Query(v.ch)
+			if truth != factVal {
+				return false, fmt.Errorf("Conflicting definitions for %c", v.ch)
+			}
+		}
 	}
-	q, _ := facts.Query(v.ch)
+	value, _ := facts.Query(v.ch)
 	if verbose {
 		fmt.Printf("%v => %c\n", v.next, v.ch)
-		fmt.Printf("%c = %v\n", v.ch, q)
+		fmt.Printf("%c = %v\n", v.ch, value)
 	}
-	return q
+	return value, nil
 }
 
 func (v *Value) String() string {
@@ -67,12 +77,15 @@ type UnaryGate struct {
 	next  TreeNode
 }
 
-func (g *UnaryGate) Evaluate() bool {
+func (g *UnaryGate) Evaluate() (bool, error) {
 	next := g.next
 	if next == nil {
 		panic("Not operator called on nil ptr")
 	}
-	nval := next.Evaluate()
+	nval, err := next.Evaluate()
+	if err != nil {
+		return false, err // TODO: address error
+	}
 
 	var value bool
 	switch g.gType {
@@ -85,7 +98,7 @@ func (g *UnaryGate) Evaluate() bool {
 	if verbose {
 		fmt.Printf("%s%v = %v\n", g.gType, g.next, value)
 	}
-	return value
+	return value, nil
 }
 
 func (g *UnaryGate) String() string {
@@ -100,14 +113,20 @@ type BinaryGate struct {
 }
 
 // TODO: cache results intelligently
-func (g *BinaryGate) Evaluate() bool {
+func (g *BinaryGate) Evaluate() (bool, error) {
 	left := g.left
 	right := g.right
 	if left == nil || right == nil {
-		panic("Binary operator on nil ptr")
+		panic("Binary operator called on nil ptr")
 	}
-	lval := left.Evaluate()
-	rval := right.Evaluate()
+	lval, err := left.Evaluate()
+	if err != nil {
+		return false, err // TODO: address error
+	}
+	rval, err := right.Evaluate()
+	if err != nil {
+		return false, err
+	}
 	var value bool
 
 	switch g.gType {
@@ -124,7 +143,7 @@ func (g *BinaryGate) Evaluate() bool {
 	if verbose {
 		fmt.Printf("%v %s %v = %v\n", left, g.gType, right, value)
 	}
-	return value
+	return value, nil
 }
 
 func (g *BinaryGate) String() string {
