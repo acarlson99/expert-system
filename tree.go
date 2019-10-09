@@ -4,12 +4,13 @@ import "fmt"
 
 type TreeNode interface {
 	Evaluate() bool
+	String() string
 }
 
 // value literal.  'A', 'B' evaluate to themselves or the child node
 type Value struct {
-	index byte
-	next  TreeNode
+	ch   byte
+	next TreeNode
 }
 
 func (v *Value) Evaluate() bool {
@@ -17,16 +18,23 @@ func (v *Value) Evaluate() bool {
 
 	if v.next != nil {
 		truth := v.next.Evaluate()
-		facts.Set(v.index, truth)
+		facts.Set(v.ch, truth)
 	}
-	q, _ := facts.Query(v.index)
+	q, _ := facts.Query(v.ch)
 	if verbose {
-		fmt.Printf("%c evaluating to %v\n", v.index, q)
+		fmt.Printf("%c evaluating to %v\n", v.ch, q)
 	}
 	return q
 }
 
-// Unary gate
+func (v *Value) String() string {
+	if v.next != nil {
+		return v.next.String() + " => " + string(v.ch)
+	}
+	return string(v.ch)
+}
+
+// Gate type enum
 type GType int
 
 const (
@@ -36,9 +44,26 @@ const (
 	GateXor
 )
 
+func (t GType) String() string {
+	switch t {
+	case GateNot:
+		return "!"
+	case GateAnd:
+		return "&"
+	case GateOr:
+		return "|"
+	case GateXor:
+		return "^"
+	default:
+		return "?"
+	}
+}
+
+// Unary gate
+
 type UnaryGate struct {
-	gateType GType
-	next     TreeNode
+	gType GType
+	next  TreeNode
 }
 
 func (g *UnaryGate) Evaluate() bool {
@@ -49,11 +74,11 @@ func (g *UnaryGate) Evaluate() bool {
 	nval := next.Evaluate()
 
 	var value bool
-	switch g.gateType {
+	switch g.gType {
 	case GateNot:
 		value = !nval
 	default:
-		panic("Invalid unary gate type: " + string(g.gateType))
+		panic("Invalid unary gate type: " + string(g.gType))
 	}
 
 	if verbose {
@@ -62,11 +87,15 @@ func (g *UnaryGate) Evaluate() bool {
 	return value
 }
 
+func (g *UnaryGate) String() string {
+	return g.gType.String() + g.next.String()
+}
+
 // Binary gate
 type BinaryGate struct {
-	gateType GType
-	left     TreeNode
-	right    TreeNode
+	gType GType
+	left  TreeNode
+	right TreeNode
 }
 
 // TODO: cache results intelligently
@@ -80,7 +109,7 @@ func (g *BinaryGate) Evaluate() bool {
 	rval := right.Evaluate()
 	var value bool
 
-	switch g.gateType {
+	switch g.gType {
 	case GateAnd:
 		value = lval && rval
 	case GateOr:
@@ -88,11 +117,15 @@ func (g *BinaryGate) Evaluate() bool {
 	case GateXor:
 		value = lval != rval
 	default:
-		panic("Invalid binary gate type: " + string(g.gateType))
+		panic("Invalid binary gate type: " + string(g.gType))
 	}
 
 	if verbose {
 		fmt.Printf("left: %v, right: %v, evaluating to %v\n", lval, rval, value)
 	}
 	return value
+}
+
+func (g *BinaryGate) String() string {
+	return "(" + g.left.String() + ") " + g.gType.String() + " (" + g.right.String() + ")"
 }
