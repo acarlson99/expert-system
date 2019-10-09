@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -23,5 +22,5 @@ func TestEvaluate(t *testing.T) {
 		t.Errorf("Expect %v got %v", expected, value)
 	}
 
-	fmt.Println(tree)
+	// fmt.Println(tree)
 }

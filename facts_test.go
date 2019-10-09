@@ -45,4 +45,22 @@ func TestSetQuery(t *testing.T) {
 			t.Errorf("Did not set '%c' to %v", tests[ii], res)
 		}
 	}
+
+	issetTests := []byte{'A', 'B', 'F', 'G', 'H'}
+	issetBool := []bool{true, false, false, true, false}
+
+	for ii := range issetTests {
+		truth, err := f.IsSet(issetTests[ii])
+		if err != nil {
+			panic(err)
+		}
+		if truth != issetBool[ii] {
+			t.Errorf("Var %c IsSet should be %v.  Was %v", issetTests[ii], issetBool[ii], truth)
+		}
+	}
+
+	err := f.Set('A', true)
+	if err == nil {
+		t.Errorf("Should have errored when setting 'A' twice")
+	}
 }
