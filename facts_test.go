@@ -8,7 +8,7 @@ func TestRange(t *testing.T) {
 	tests := []byte{'A', 'A' - 1, 'Z', 'Z' + 1, 'G', 'a', 'z'}
 	expected := []bool{true, false, true, false, true, false, false}
 
-	f := NewFacts()
+	f := GetFacts()
 
 	for ii := range tests {
 		if v := f.InRange(tests[ii]); v != expected[ii] {
@@ -20,9 +20,10 @@ func TestRange(t *testing.T) {
 func TestSetQuery(t *testing.T) {
 	tests := []byte{'A', 'A' - 1, 'Z', 'Z' + 1, 'G', 'a'}
 	shouldErr := []bool{false, true, false, true, false, true}
-	set := []Fact{T, F, F, T, U, F}
+	set := []bool{true, false, false, true, false, false}
 
-	f := NewFacts()
+	f := GetFacts()
+	f.Reset()
 
 	for ii := range tests {
 		err := f.Set(tests[ii], set[ii])

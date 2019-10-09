@@ -2,39 +2,31 @@ package main
 
 import "fmt"
 
-type Fact byte
-
-const (
-	F Fact = 'F'
-	T Fact = 'T'
-	U Fact = 'U'
-)
-
 type Facts struct {
-	f [26]Fact
+	f [26]bool
 }
 
-func (t Fact) String() string {
-	switch t {
-	case F:
-		return "F"
-	case T:
-		return "T"
-	case U:
-		return "U"
+var g_facts *Facts
+
+func GetFacts() *Facts {
+	if g_facts != nil {
+		return g_facts
 	}
-	panic(fmt.Sprintf("Invalid value for fact: '%c'", t))
-}
-
-func NewFacts() Facts {
-	var f Facts
+	f := new(Facts)
 	f.Init()
+	g_facts = f
 	return f
 }
 
 func (f *Facts) Init() {
 	for ii := range f.f {
-		f.f[ii] = U
+		f.f[ii] = false
+	}
+}
+
+func (f *Facts) Reset() {
+	for ii := range f.f {
+		f.f[ii] = false
 	}
 }
 
@@ -43,14 +35,14 @@ func (f *Facts) InRange(c byte) bool {
 	return (idx >= 0 && idx < 26)
 }
 
-func (f *Facts) Query(c byte) (Fact, error) {
+func (f *Facts) Query(c byte) (bool, error) {
 	if !f.InRange(c) {
-		return U, fmt.Errorf("Variable '%c' not available", c)
+		return false, fmt.Errorf("Variable '%c' not available", c)
 	}
 	return f.f[c-'A'], nil
 }
 
-func (f *Facts) Set(c byte, t Fact) error {
+func (f *Facts) Set(c byte, t bool) error {
 	if !f.InRange(c) {
 		return fmt.Errorf("Variable '%c' not available", c)
 	}
