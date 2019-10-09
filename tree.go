@@ -22,7 +22,8 @@ func (v *Value) Evaluate() bool {
 	}
 	q, _ := facts.Query(v.ch)
 	if verbose {
-		fmt.Printf("%c evaluating to %v\n", v.ch, q)
+		fmt.Printf("%v => %c\n", v.next, v.ch)
+		fmt.Printf("%c = %v\n", v.ch, q)
 	}
 	return q
 }
@@ -82,7 +83,7 @@ func (g *UnaryGate) Evaluate() bool {
 	}
 
 	if verbose {
-		fmt.Printf("next: %v, evaluating to %v\n", nval, value)
+		fmt.Printf("%s%v = %v\n", g.gType, g.next, value)
 	}
 	return value
 }
@@ -121,11 +122,11 @@ func (g *BinaryGate) Evaluate() bool {
 	}
 
 	if verbose {
-		fmt.Printf("left: %v, right: %v, evaluating to %v\n", lval, rval, value)
+		fmt.Printf("%v %s %v = %v\n", left, g.gType, right, value)
 	}
 	return value
 }
 
 func (g *BinaryGate) String() string {
-	return "(" + g.left.String() + ") " + g.gType.String() + " (" + g.right.String() + ")"
+	return "(" + g.left.String() + " " + g.gType.String() + " " + g.right.String() + ")"
 }
