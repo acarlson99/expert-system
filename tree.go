@@ -96,17 +96,15 @@ func (g *BinaryGate) Evaluate() bool {
 	if left == nil || right == nil {
 		panic("Binary operator called on nil ptr")
 	}
-	lval := left.Evaluate()
-	rval := right.Evaluate()
-	var value bool
 
+	var value bool
 	switch g.gType {
 	case GateAnd:
-		value = lval && rval
+		value = left.Evaluate() && right.Evaluate()
 	case GateOr:
-		value = lval || rval
+		value = left.Evaluate() || right.Evaluate()
 	case GateXor:
-		value = lval != rval
+		value = left.Evaluate() != right.Evaluate()
 	default:
 		panic("Invalid binary gate type: " + string(g.gType))
 	}
