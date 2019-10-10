@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 type TreeNode interface {
-	Evaluate() (bool, error)
+	Evaluate() bool
 	String() string
 }
 
@@ -12,14 +12,14 @@ type Value struct {
 	ch byte
 }
 
-func (v *Value) Evaluate() (bool, error) {
+func (v *Value) Evaluate() bool {
 	facts := GetFacts()
 
 	value, _ := facts.Query(v.ch)
 	if verbose {
 		fmt.Printf("%c = %v\n", v.ch, value)
 	}
-	return value, nil
+	return value
 }
 
 func (v *Value) String() string {
@@ -58,15 +58,12 @@ type UnaryGate struct {
 	next  TreeNode
 }
 
-func (g *UnaryGate) Evaluate() (bool, error) {
+func (g *UnaryGate) Evaluate() bool {
 	next := g.next
 	if next == nil {
 		panic("Not operator called on nil ptr")
 	}
-	nval, err := next.Evaluate()
-	if err != nil {
-		return false, err
-	}
+	nval := next.Evaluate()
 
 	var value bool
 	switch g.gType {
@@ -79,7 +76,7 @@ func (g *UnaryGate) Evaluate() (bool, error) {
 	if verbose {
 		fmt.Printf("%s%v = %v\n", g.gType, g.next, value)
 	}
-	return value, nil
+	return value
 }
 
 func (g *UnaryGate) String() string {
@@ -93,20 +90,14 @@ type BinaryGate struct {
 	right TreeNode
 }
 
-func (g *BinaryGate) Evaluate() (bool, error) {
+func (g *BinaryGate) Evaluate() bool {
 	left := g.left
 	right := g.right
 	if left == nil || right == nil {
 		panic("Binary operator called on nil ptr")
 	}
-	lval, err := left.Evaluate()
-	if err != nil {
-		return false, err
-	}
-	rval, err := right.Evaluate()
-	if err != nil {
-		return false, err
-	}
+	lval := left.Evaluate()
+	rval := right.Evaluate()
 	var value bool
 
 	switch g.gType {
@@ -123,7 +114,7 @@ func (g *BinaryGate) Evaluate() (bool, error) {
 	if verbose {
 		fmt.Printf("%v %s %v = %v\n", left, g.gType, right, value)
 	}
-	return value, nil
+	return value
 }
 
 func (g *BinaryGate) String() string {
