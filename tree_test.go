@@ -12,13 +12,12 @@ func TestEvaluate(t *testing.T) {
 	f.Set('C', true)
 
 	// !A ^ (B & C) => D
-	tree := &Value{'D',
-		&BinaryGate{GateXor,
-			&UnaryGate{GateNot,
-				&Value{'A', nil}},
-			&BinaryGate{GateAnd,
-				&Value{'B', nil},
-				&Value{'C', nil}}}}
+	tree := &BinaryGate{GateXor,
+		&UnaryGate{GateNot,
+			&Value{'A'}},
+		&BinaryGate{GateAnd,
+			&Value{'B'},
+			&Value{'C'}}}
 
 	value, err := tree.Evaluate()
 	if err != nil {
@@ -38,8 +37,8 @@ func TestValue(t *testing.T) {
 	f.Set('B', false)
 
 	trees := []TreeNode{
-		&Value{'A', nil},
-		&Value{'B', nil},
+		&Value{'A'},
+		&Value{'B'},
 	}
 	expected := []bool{true, false}
 
@@ -63,9 +62,9 @@ func TestNot(t *testing.T) {
 
 	trees := []TreeNode{
 		&UnaryGate{GateNot,
-			&Value{'A', nil}},
+			&Value{'A'}},
 		&UnaryGate{GateNot,
-			&Value{'B', nil}},
+			&Value{'B'}},
 	}
 	expected := []bool{false, true}
 
@@ -88,20 +87,17 @@ func TestAnd(t *testing.T) {
 	f.Set('C', true)
 
 	trees := []TreeNode{
-		&Value{'D',
-			&BinaryGate{GateAnd,
-				&Value{'A', nil},
-				&Value{'B', nil}}},
+		&BinaryGate{GateAnd,
+			&Value{'A'},
+			&Value{'B'}},
 
-		&Value{'E',
-			&BinaryGate{GateAnd,
-				&Value{'A', nil},
-				&Value{'C', nil}}},
+		&BinaryGate{GateAnd,
+			&Value{'A'},
+			&Value{'C'}},
 
-		&Value{'H',
-			&BinaryGate{GateAnd,
-				&Value{'F', nil},
-				&Value{'G', nil}}},
+		&BinaryGate{GateAnd,
+			&Value{'F'},
+			&Value{'G'}},
 	}
 	expected := []bool{false, true, false}
 
@@ -126,20 +122,17 @@ func TestOr(t *testing.T) {
 	f.Set('D', false)
 
 	trees := []TreeNode{
-		&Value{'E',
-			&BinaryGate{GateOr,
-				&Value{'A', nil},
-				&Value{'B', nil}}},
+		&BinaryGate{GateOr,
+			&Value{'A'},
+			&Value{'B'}},
 
-		&Value{'F',
-			&BinaryGate{GateOr,
-				&Value{'B', nil},
-				&Value{'C', nil}}},
+		&BinaryGate{GateOr,
+			&Value{'B'},
+			&Value{'C'}},
 
-		&Value{'G',
-			&BinaryGate{GateOr,
-				&Value{'C', nil},
-				&Value{'D', nil}}},
+		&BinaryGate{GateOr,
+			&Value{'C'},
+			&Value{'D'}},
 	}
 	expected := []bool{true, true, false}
 
@@ -164,20 +157,17 @@ func TestXor(t *testing.T) {
 	f.Set('D', false)
 
 	trees := []TreeNode{
-		&Value{'E',
-			&BinaryGate{GateXor,
-				&Value{'A', nil},
-				&Value{'B', nil}}},
+		&BinaryGate{GateXor,
+			&Value{'A'},
+			&Value{'B'}},
 
-		&Value{'F',
-			&BinaryGate{GateXor,
-				&Value{'B', nil},
-				&Value{'C', nil}}},
+		&BinaryGate{GateXor,
+			&Value{'B'},
+			&Value{'C'}},
 
-		&Value{'G',
-			&BinaryGate{GateXor,
-				&Value{'C', nil},
-				&Value{'D', nil}}},
+		&BinaryGate{GateXor,
+			&Value{'C'},
+			&Value{'D'}},
 	}
 	expected := []bool{false, true, false}
 

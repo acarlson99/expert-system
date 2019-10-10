@@ -7,41 +7,22 @@ type TreeNode interface {
 	String() string
 }
 
-// value literal.  'A', 'B' evaluate to themselves or the child node
+// value literal.  'A', 'B' evaluate to their boolean values
 type Value struct {
-	ch   byte
-	next TreeNode
+	ch byte
 }
 
 func (v *Value) Evaluate() (bool, error) {
 	facts := GetFacts()
 
-	if v.next != nil {
-		truth, err := v.next.Evaluate()
-		if err != nil {
-			return false, err // TODO: address error
-		}
-		if set, _ := facts.IsSet(v.ch); !set {
-			facts.Set(v.ch, truth)
-		} else {
-			factVal, _ := facts.Query(v.ch)
-			if truth != factVal {
-				return false, fmt.Errorf("Conflicting definitions for %c", v.ch)
-			}
-		}
-	}
 	value, _ := facts.Query(v.ch)
 	if verbose {
-		fmt.Printf("%v => %c\n", v.next, v.ch)
 		fmt.Printf("%c = %v\n", v.ch, value)
 	}
 	return value, nil
 }
 
 func (v *Value) String() string {
-	if v.next != nil {
-		return v.next.String() + " => " + string(v.ch)
-	}
 	return string(v.ch)
 }
 
@@ -84,7 +65,7 @@ func (g *UnaryGate) Evaluate() (bool, error) {
 	}
 	nval, err := next.Evaluate()
 	if err != nil {
-		return false, err // TODO: address error
+		return false, err
 	}
 
 	var value bool
@@ -112,7 +93,6 @@ type BinaryGate struct {
 	right TreeNode
 }
 
-// TODO: cache results intelligently
 func (g *BinaryGate) Evaluate() (bool, error) {
 	left := g.left
 	right := g.right
@@ -121,7 +101,7 @@ func (g *BinaryGate) Evaluate() (bool, error) {
 	}
 	lval, err := left.Evaluate()
 	if err != nil {
-		return false, err // TODO: address error
+		return false, err
 	}
 	rval, err := right.Evaluate()
 	if err != nil {
