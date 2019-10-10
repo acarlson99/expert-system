@@ -16,7 +16,10 @@ func TestEvaluate(t *testing.T) {
 		&BinaryGate{GateAnd, &Value{'B', nil}, &Value{'C', nil}}}}
 
 	// verbose = true
-	value := tree.Evaluate()
+	value, err := tree.Evaluate()
+	if err != nil {
+		panic(err) // TODO: address error
+	}
 	expected := true
 	if value != expected {
 		t.Errorf("Expect %v got %v", expected, value)
