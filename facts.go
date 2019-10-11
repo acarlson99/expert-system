@@ -77,6 +77,22 @@ func (f *Facts) Query(c byte) (bool, error) {
 	}
 }
 
+func (f *Facts) UserQuery(cs []byte) ([]bool, error) {
+	f.SoftReset()
+	res := []bool{}
+	for ii := range cs {
+		if !f.InRange(cs[ii]) {
+			return res, fmt.Errorf("Variable '%c' not available", cs[ii])
+		}
+		if err := f.Evaluate(cs[ii]); err != nil {
+			return res, err
+		}
+		q, _ := f.Query(cs[ii])
+		res = append(res, q)
+	}
+	return res, nil
+}
+
 func (f *Facts) IsSet(c byte) (bool, error) {
 	if !f.InRange(c) {
 		return false, fmt.Errorf("Variable '%c' not available", c)
@@ -122,5 +138,11 @@ func (f *Facts) Evaluate(c byte) error {
 		return nil
 	}
 	value := fact.r.Evaluate()
-	return f.Set(c, value)
+	if !fact.set && value {
+		return f.Set(c, value)
+	}
+	if fact.set && fact.t != value {
+		return fmt.Errorf("Variable '%c' set to different values", c)
+	}
+	return nil
 }

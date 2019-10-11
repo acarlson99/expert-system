@@ -86,11 +86,8 @@ func TestAddRule(t *testing.T) {
 	for ii := range trees {
 		f.AddRule('D', trees[ii])
 	}
-	fmt.Println(f.Evaluate('D'))
-	fmt.Println(f.Query('D'))
+	fmt.Println(f.UserQuery([]byte{'D'}))
 	f.AddRule('B', &Value{'A'})
-	f.SoftReset()
-	fmt.Println(f.Evaluate('D'))
-	fmt.Println(f.Query('D'))
+	fmt.Println(f.UserQuery([]byte{'D', 'A', 'B'}))
 	verbose = false
 }
