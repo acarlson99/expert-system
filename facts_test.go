@@ -82,13 +82,40 @@ func TestAddRule(t *testing.T) {
 	f.Reset()
 	f.UserSet([]byte{'A'})
 
-	verbose = true
 	for ii := range trees {
 		f.AddRule('D', trees[ii])
 	}
 	f.AddRule('G', &Value{'Z'})
-	fmt.Println(f.UserQuery([]byte{'D'}))
+	res, _ := f.UserQuery([]byte{'D'})
+	expected := []bool{false}
+	for ii := range expected {
+		if expected[ii] != res[ii] {
+			t.Error("ERR")
+		}
+	}
 	f.AddRule('B', &Value{'A'})
-	fmt.Println(f.UserQuery([]byte{'D', 'A', 'B', 'G'}))
+	res, _ = f.UserQuery([]byte{'D', 'A', 'B', 'G'})
+	expected = []bool{true, true, true, false}
+	for ii := range expected {
+		if expected[ii] != res[ii] {
+			t.Error("ERR")
+		}
+	}
+}
+
+func TestLongDefinitions(t *testing.T) {
+	f := GetFacts()
+	f.Reset()
+	f.AddRule('A', &Value{'B'})
+	f.AddRule('B', &Value{'C'})
+	f.AddRule('C', &Value{'D'})
+	verbose = true
+	fmt.Println("START")
+	fmt.Println(f.UserQuery([]byte{'A'}))
+	fmt.Println("END")
+	f.UserSet([]byte{'D'})
+	fmt.Println(f.UserQuery([]byte{'A'}))
+	fmt.Println("A")
+	fmt.Println(f.UserQuery([]byte{'D'}))
 	verbose = false
 }
