@@ -43,7 +43,7 @@ func (f *Facts) SoftReset() {
 	}
 }
 
-func (f *Facts) SetUser(cs []byte) error {
+func (f *Facts) UserSet(cs []byte) error {
 	f.SoftReset()
 	for ii := range cs {
 		if !f.InRange(cs[ii]) {
