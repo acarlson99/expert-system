@@ -84,7 +84,7 @@ func (f *Facts) UserQuery(cs []byte) ([]bool, error) {
 		if !f.InRange(cs[ii]) {
 			return res, fmt.Errorf("Variable '%c' not available", cs[ii])
 		}
-		if verbose { // TODO: kill
+		if verbose { // TODO: kill - don't be so mean to your code :c
 			fmt.Println("EVALUATING")
 		}
 		if err := f.Evaluate(cs[ii]); err != nil {
