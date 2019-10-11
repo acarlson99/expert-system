@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -63,4 +64,33 @@ func TestSetQuery(t *testing.T) {
 	if err == nil {
 		t.Errorf("Should have errored when setting 'A' twice")
 	}
+}
+
+func TestAddRule(t *testing.T) {
+	trees := []TreeNode{
+		// A + B => D
+		// F + G => D
+		&BinaryGate{GateAnd,
+			&Value{'A'},
+			&Value{'B'}},
+		&BinaryGate{GateAnd,
+			&Value{'F'},
+			&Value{'G'}},
+	}
+
+	f := GetFacts()
+	f.Reset()
+	f.SetUser([]byte{'A'})
+
+	verbose = true
+	for ii := range trees {
+		f.AddRule('D', trees[ii])
+	}
+	fmt.Println(f.Evaluate('D'))
+	fmt.Println(f.Query('D'))
+	f.AddRule('B', &Value{'A'})
+	f.SoftReset()
+	fmt.Println(f.Evaluate('D'))
+	fmt.Println(f.Query('D'))
+	verbose = false
 }

@@ -7,6 +7,10 @@ type Fact struct {
 	t bool
 	// whether or not Fact has been set or implicit
 	set bool
+	// rule
+	r TreeNode
+	// user defined or inferred by system
+	userdefined bool
 }
 
 type Facts struct {
@@ -27,8 +31,27 @@ func GetFacts() *Facts {
 
 func (f *Facts) Reset() {
 	for ii := range f.f {
-		f.f[ii] = Fact{false, false}
+		f.f[ii] = Fact{false, false, nil, false}
 	}
+}
+
+func (f *Facts) SoftReset() {
+	for ii := range f.f {
+		if !f.f[ii].userdefined {
+			f.f[ii] = Fact{false, false, f.f[ii].r, false}
+		}
+	}
+}
+
+func (f *Facts) SetUser(cs []byte) error {
+	f.SoftReset()
+	for ii := range cs {
+		if !f.InRange(cs[ii]) {
+			return fmt.Errorf("Variable '%c' not available", cs[ii])
+		}
+		f.f[cs[ii]-'A'] = Fact{true, true, nil, true}
+	}
+	return nil
 }
 
 func (f *Facts) InRange(c byte) bool {
@@ -40,7 +63,18 @@ func (f *Facts) Query(c byte) (bool, error) {
 	if !f.InRange(c) {
 		return false, fmt.Errorf("Variable '%c' not available", c)
 	}
-	return f.f[c-'A'].t, nil
+	fact := &f.f[c-'A']
+	if a, _ := f.IsSet(c); a {
+		return fact.t, nil
+	} else if fact.r != nil {
+		err := f.Evaluate(c)
+		if err != nil {
+			return false, err
+		}
+		return fact.t, nil
+	} else {
+		return fact.t, nil
+	}
 }
 
 func (f *Facts) IsSet(c byte) (bool, error) {
@@ -61,4 +95,32 @@ func (f *Facts) Set(c byte, t bool) error {
 	fact.t = t
 	fact.set = true
 	return nil
+}
+
+func (f *Facts) AddRule(c byte, t TreeNode) error {
+	if !f.InRange(c) {
+		return fmt.Errorf("Variable '%c' not available", c)
+	} else if t == nil {
+		return fmt.Errorf("Assigning nil rule to variable '%c'", c)
+	}
+	fact := &f.f[c-'A']
+	if fact.r == nil {
+		fact.r = t
+	} else {
+		constructed := &BinaryGate{GateOr, t, fact.r}
+		fact.r = constructed
+	}
+	return nil
+}
+
+func (f *Facts) Evaluate(c byte) error {
+	if !f.InRange(c) {
+		return fmt.Errorf("Variable '%c' not available", c)
+	}
+	fact := &f.f[c-'A']
+	if fact.r == nil {
+		return nil
+	}
+	value := fact.r.Evaluate()
+	return f.Set(c, value)
 }
