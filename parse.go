@@ -236,15 +236,17 @@ func makeRule(lhs string, rhs string) []Rule {
 	out := []Rule{}
 	rrhs := strrev(rhs)
 	for _, c := range rrhs {
+		// TODO: check error
+		node, _ := makeNode(lhs)
 		out = append(out, Rule{
 			id:   c,
-			node: makeNode(lhs),
+			node: node,
 		})
 	}
 	return out
 }
 
-func makeNode(lhs string) TreeNode {
+func makeNode(lhs string) (TreeNode, error) {
 	stack := []TreeNode{}
 	var tree TreeNode
 	var t1 TreeNode
@@ -255,15 +257,30 @@ func makeNode(lhs string) TreeNode {
 		if c >= 'A' && c <= 'Z' {
 			tree = &Value{ch: byte(c)}
 			stack = append(stack, tree)
+		} else if c == '!' {
+			// TODO: implement
+			tmp := &UnaryGate{
+				gType: getType(c),
+				next:  nil,
+			}
+			_ = tmp
+			if len(stack) == 0 {
+				return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
+			}
 		} else { // TODO: handle not
 			tmp := &BinaryGate{
 				gType: getType(c),
 				left:  nil,
 				right: nil,
 			}
-			// TODO: check against zero size stack in both pops
+			if len(stack) == 0 {
+				return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
+			}
 			t1 = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
+			if len(stack) == 0 {
+				return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
+			}
 			t2 = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 
@@ -275,8 +292,11 @@ func makeNode(lhs string) TreeNode {
 		}
 	}
 	// TODO: check against empty stack
+	if len(stack) == 0 {
+		return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
+	}
 	tree = stack[len(stack)-1]
-	return tree
+	return tree, nil
 }
 
 func getType(c rune) GType {
