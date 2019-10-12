@@ -31,18 +31,6 @@ func main() {
 	for readline(fmt.Sprintf("@%d: ", cnt), scanner) {
 		cnt += 1
 		eval(prog, scanner.Text())
-		/* TODO: make work with new return
-		if toks[0][0] == 'v' { // TODO: remove
-			verbose = verbose != true
-			continue
-		} else if toks[0][0] == 'h' {
-			for ii, fact := range f.f {
-				fmt.Printf("%s => %c\n", fact.rule, ii+'A')
-			}
-			continue
-		} else {
-		*/
-
 	}
 	if scanner.Err() != nil {
 		fmt.Printf("error: %s\n", scanner.Err())
@@ -64,23 +52,19 @@ func eval(prog *Facts, src string) {
 	case nil:
 		return
 	case Assign:
-		if len(t) == 0 {
-			return
-		}
-		if prog.UserSet(t) != nil {
+		if len(t) > 0 && prog.UserSet(t) != nil {
 			fmt.Println(err)
 			return
 		}
 	case Query:
-		if len(t) == 0 {
-			return
+		if len(t) > 0 {
+			ret, err := prog.UserQuery(t)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println(ret)
 		}
-		ret, err := prog.UserQuery(t)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(ret)
 	case []Rule:
 		for _, r := range t {
 			prog.AddRule(byte(r.id), r.node)
@@ -88,5 +72,14 @@ func eval(prog *Facts, src string) {
 	default:
 		fmt.Printf("i-error: unknown parse return (%T,%+v)\n", ret, ret)
 		return
+	}
+	if verbose {
+		for i, f := range prog.f {
+			str := ""
+			if f.rule != nil {
+				str = fmt.Sprintf("; %s >= %c", f.rule.String(), i+'A')
+			}
+			fmt.Printf("[%c]: %t%s\n", i+'A', f.t, str)
+		}
 	}
 }

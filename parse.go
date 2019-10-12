@@ -22,6 +22,8 @@ func Parse(src string) (interface{}, error) {
 		lhs := strings.Join(strings.Fields(src[:idx]), "")
 		rhs := strings.Join(strings.Fields(src[idx+2:]), "")
 		return parseRule(src, lhs, rhs)
+	} else if src == "v" || src == "verbose" {
+		verbose = verbose != true
 	} else {
 		err := "error: unknown expression `%s`"
 		return nil, fmt.Errorf("error: "+err, src)

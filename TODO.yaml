@@ -4,7 +4,6 @@ TODO:
       ?B
       This evaluated A twice
   - Add ability to remove rules
-  - Be able to read from files
   - Possible logic bug:
 ```
     A=>C+D
