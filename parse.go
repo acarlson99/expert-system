@@ -31,7 +31,7 @@ func Parse(toks []string) (interface{}, error) {
 
 // @unop
 
-func parseUnop(op string) ([]byte, error) {
+func parseUnop(op string) (interface{}, error) {
 	switch op[0] {
 	case '=':
 		return assign(op)
@@ -43,9 +43,10 @@ func parseUnop(op string) ([]byte, error) {
 	}
 }
 
-func assign(src string) ([]byte, error) {
+type Assign []byte
+
+func assign(src string) (Assign, error) {
 	out := []byte{}
-	out = append(out, src[0])
 	if len(src) == 1 {
 		err := "empty left handside in assignment"
 		return out, fmt.Errorf("error: " + err)
@@ -62,9 +63,10 @@ func assign(src string) ([]byte, error) {
 	return out, nil
 }
 
-func query(src string) ([]byte, error) {
+type Query []byte
+
+func query(src string) (Query, error) {
 	out := []byte{}
-	out = append(out, src[0])
 	if len(src) == 1 {
 		err := "empty left handside in query"
 		return out, fmt.Errorf("error: " + err)

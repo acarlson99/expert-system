@@ -23,24 +23,20 @@ func main() {
 			for _, r := range t {
 				f.AddRule(byte(r.id), r.node)
 			}
-		case []byte:
-			switch t[0] {
-			case '=':
-				// TODO: remove panics
-				err := f.UserSet(t[1:])
-				if err != nil {
-					panic(err)
-				}
-			case '?':
-				ret, err := f.UserQuery(t[1:])
-				if err != nil {
-					panic(err)
-				}
-				fmt.Println(ret)
-			default:
-				panic("ahhh")
+		case Query:
+			ret, err := f.UserQuery(t)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(ret)
+		case Assign:
+			// TODO: remove panics
+			err := f.UserSet(t)
+			if err != nil {
+				panic(err)
 			}
 		default:
+			fmt.Printf("%T: %+v\n", prog, prog)
 			panic("Bad return from Parse")
 		}
 	}
