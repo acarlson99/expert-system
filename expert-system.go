@@ -77,7 +77,7 @@ func eval(prog *Facts, src string) {
 		for i, f := range prog.f {
 			str := ""
 			if f.rule != nil {
-				str = fmt.Sprintf("; %s >= %c", f.rule.String(), i+'A')
+				str = fmt.Sprintf("; %s => %c", f.rule.String(), i+'A')
 			}
 			fmt.Printf("[%c]: %t%s\n", i+'A', f.t, str)
 		}
