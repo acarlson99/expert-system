@@ -21,10 +21,15 @@ func main() {
 		switch t := prog.(type) {
 		case []Rule:
 			f.AddRule(byte(t[0].id), t[0].node)
-		case []string:
-			fmt.Println("A")
-		case []rune:
-			f.UserQuery([]byte(string(t)))
+		case []byte:
+			switch t[0] {
+			case '=':
+				// TODO: assign
+			case '?':
+				f.UserQuery(t)
+			default:
+				panic("ahhh")
+			}
 		default:
 			panic("Bad return from Parse")
 		}

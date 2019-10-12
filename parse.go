@@ -31,28 +31,29 @@ func Parse(toks []string) (interface{}, error) {
 
 // @unop
 
-func parseUnop(op string) ([]rune, error) {
+func parseUnop(op string) ([]byte, error) {
 	switch op[0] {
 	case '=':
-		return assign(op[1:])
+		return assign(op)
 	case '?':
-		return query(op[1:])
+		return query(op)
 	default:
 		// TODO: handle builtins
 		return nil, nil
 	}
 }
 
-func assign(src string) ([]rune, error) {
-	out := []rune{}
-	if len(src) == 0 {
+func assign(src string) ([]byte, error) {
+	out := []byte{}
+	out = append(out, src[0])
+	if len(src) == 1 {
 		err := "empty left handside in assignment"
 		return out, fmt.Errorf("error: " + err)
 	}
-	for _, c := range src {
+	for _, c := range src[1:] {
 		fmt.Println(c)
 		if c >= 'A' && c <= 'Z' {
-			out = append(out, c)
+			out = append(out, byte(c))
 		} else {
 			err := "unknown literal `%c` in assignment `%s`"
 			return out, fmt.Errorf("error: "+err, c, src)
@@ -61,16 +62,17 @@ func assign(src string) ([]rune, error) {
 	return out, nil
 }
 
-func query(src string) ([]rune, error) {
-	out := []rune{}
-	if len(src) == 0 {
+func query(src string) ([]byte, error) {
+	out := []byte{}
+	out = append(out, src[0])
+	if len(src) == 1 {
 		err := "empty left handside in query"
 		return out, fmt.Errorf("error: " + err)
 	}
-	for _, c := range src {
+	for _, c := range src[1:] {
 		fmt.Println(c)
 		if c >= 'A' && c <= 'Z' {
-			out = append(out, c)
+			out = append(out, byte(c))
 		} else {
 			err := "unknown literal `%c` in query `%s`"
 			return out, fmt.Errorf("error: "+err, c, src)
