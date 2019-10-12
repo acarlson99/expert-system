@@ -5,3 +5,4 @@ TODO:
       This evaluated A twice
   - Recursive definitions:
       A => A smashes that stack
+  - Add ability to remove rules

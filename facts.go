@@ -11,6 +11,8 @@ type Fact struct {
 	rule TreeNode
 	// user defined or inferred by system
 	userdefined bool
+	// visited in traversal
+	visited bool
 }
 
 type Facts struct {
@@ -31,27 +33,27 @@ func GetFacts() *Facts {
 
 func (f *Facts) Reset() {
 	for ii := range f.f {
-		f.f[ii] = Fact{false, false, nil, false}
+		f.f[ii] = Fact{false, false, nil, false, false}
 	}
 }
 
 func (f *Facts) SoftReset() {
 	for ii := range f.f {
 		if !f.f[ii].userdefined {
-			f.f[ii] = Fact{false, false, f.f[ii].rule, false}
+			f.f[ii] = Fact{false, false, f.f[ii].rule, false, false}
 		}
 	}
 }
 
 func (f *Facts) UserSet(cs []byte) error {
 	for ii := range f.f {
-		f.f[ii] = Fact{false, false, f.f[ii].rule, false}
+		f.f[ii] = Fact{false, false, f.f[ii].rule, false, false}
 	}
 	for ii := range cs {
 		if !f.InRange(cs[ii]) {
 			return fmt.Errorf("Variable '%c' not available", cs[ii])
 		}
-		f.f[cs[ii]-'A'] = Fact{true, true, nil, true}
+		f.f[cs[ii]-'A'] = Fact{true, true, f.f[cs[ii]-'A'].rule, true, false}
 	}
 	return nil
 }
@@ -66,9 +68,11 @@ func (f *Facts) Query(c byte) (bool, error) {
 		return false, fmt.Errorf("Variable '%c' not available", c)
 	}
 	fact := &f.f[c-'A']
-	if a, _ := f.IsSet(c); a {
+	if a, _ := f.IsSet(c); a || fact.visited {
 		return fact.t, nil
-	} else if fact.rule != nil {
+	}
+	fact.visited = true
+	if fact.rule != nil {
 		err := f.Evaluate(c)
 		if err != nil {
 			return false, err
@@ -136,7 +140,11 @@ func (f *Facts) Evaluate(c byte) error {
 		return fmt.Errorf("Variable '%c' not available", c)
 	}
 	fact := &f.f[c-'A']
-	if fact.rule == nil {
+	if fact.rule == nil || fact.visited {
+		return nil
+	}
+	fact.visited = true
+	if fact.userdefined {
 		return nil
 	}
 	value := fact.rule.Evaluate()
