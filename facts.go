@@ -44,7 +44,9 @@ func (f *Facts) SoftReset() {
 }
 
 func (f *Facts) UserSet(cs []byte) error {
-	f.SoftReset()
+	for ii := range f.f {
+		f.f[ii] = Fact{false, false, f.f[ii].rule, false}
+	}
 	for ii := range cs {
 		if !f.InRange(cs[ii]) {
 			return fmt.Errorf("Variable '%c' not available", cs[ii])
@@ -83,9 +85,6 @@ func (f *Facts) UserQuery(cs []byte) ([]bool, error) {
 	for ii := range cs {
 		if !f.InRange(cs[ii]) {
 			return res, fmt.Errorf("Variable '%c' not available", cs[ii])
-		}
-		if verbose { // TODO: kill - don't be so mean to your code :c
-			fmt.Println("EVALUATING")
 		}
 		if err := f.Evaluate(cs[ii]); err != nil {
 			return res, err
@@ -139,9 +138,6 @@ func (f *Facts) Evaluate(c byte) error {
 	fact := &f.f[c-'A']
 	if fact.rule == nil {
 		return nil
-	}
-	if verbose { // TODO: kill
-		fmt.Println("CALLING EVALUATE ON", c)
 	}
 	value := fact.rule.Evaluate()
 	if !fact.set && value {

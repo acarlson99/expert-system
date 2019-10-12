@@ -13,11 +13,31 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		toks := Scan(scanner.Text())
-		prog, err := Parse(toks)
-		if err != nil {
-			fmt.Println(err)
+
+		// prog, err = Parse(toks)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	continue
+		// }
+
+		var prog interface{}
+		var err error
+		if toks[0][0] == 'v' { // TODO: remove
+			verbose = verbose != true
 			continue
+		} else if toks[0][0] == 'h' {
+			for ii, fact := range f.f {
+				fmt.Printf("%s => %c\n", fact.rule, ii+'A')
+			}
+			continue
+		} else {
+			prog, err = Parse(toks)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
 		}
+
 		switch t := prog.(type) {
 		case []Rule:
 			for _, r := range t {
