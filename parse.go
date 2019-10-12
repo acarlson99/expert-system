@@ -5,28 +5,28 @@ import (
 	"strings"
 )
 
-func Parse(toks []string) (interface{}, error) {
-	switch len(toks) {
-	case 0:
+func Parse(src string) (interface{}, error) {
+	if len(src) == 0 {
 		return nil, nil
-	case 1:
-		return parseUnop(toks[0])
-	default:
-		rule := false
-		for _, s := range toks {
-			if s == "=>" {
-				rule = true
-				break
-			}
+	} else if src[0] == '=' || src[0] == '?' {
+		in := strings.Join(strings.Fields(src), "")
+		return parseUnop(in)
+	} else if idx := strings.Index(src, "=>"); idx != -1 {
+		if idx == 0 {
+			err := "left handside of rule `%s` is empty"
+			return nil, fmt.Errorf("error: "+err, src)
+		} else if len(src) == idx+2 {
+			err := "right handside of rule `%s` is empty"
+			return nil, fmt.Errorf("error: "+err, src)
 		}
-		if rule {
-			return parseRule(toks)
-		} else {
-			estr := strings.Join(toks, " ")
-			err := "unknown expression `%s`"
-			return nil, fmt.Errorf("error: "+err, estr)
-		}
+		lhs := strings.Join(strings.Fields(src[:idx]), "")
+		rhs := strings.Join(strings.Fields(src[idx+2:]), "")
+		return parseRule(src, lhs, rhs)
+	} else {
+		err := "error: unknown expression `%s`"
+		return nil, fmt.Errorf("error: "+err, src)
 	}
+	return nil, nil
 }
 
 // @unop
@@ -38,8 +38,8 @@ func parseUnop(op string) (interface{}, error) {
 	case '?':
 		return query(op)
 	default:
-		// TODO: handle builtins
-		return nil, nil
+		err := "unknown literal `%c` in expression `%s`"
+		return nil, fmt.Errorf("error: "+err, op[0], op)
 	}
 }
 
@@ -48,7 +48,7 @@ type Assign []byte
 func assign(src string) (Assign, error) {
 	out := []byte{}
 	if len(src) == 1 {
-		err := "empty left handside in assignment"
+		err := "empty right handside in assignment"
 		return out, fmt.Errorf("error: " + err)
 	}
 	for _, c := range src[1:] {
@@ -68,7 +68,7 @@ type Query []byte
 func query(src string) (Query, error) {
 	out := []byte{}
 	if len(src) == 1 {
-		err := "empty left handside in query"
+		err := "empty right handside in query"
 		return out, fmt.Errorf("error: " + err)
 	}
 	for _, c := range src[1:] {
@@ -90,26 +90,25 @@ type Rule struct {
 	node TreeNode
 }
 
-func parseRule(toks []string) ([]Rule, error) {
+func parseRule(src string, lhs string, rhs string) ([]Rule, error) {
 	out := []Rule{}
-	lhs, rhs := splitHs(toks)
-	if err := checkHs(toks, lhs, "()!+|^", "left"); err != nil {
+	if err := checkHs(src, lhs, "()!+|^", "left"); err != nil {
 		return out, err
 	}
-	if err := checkHs(toks, rhs, "()+", "right"); err != nil {
+	if err := checkHs(src, rhs, "()+", "right"); err != nil {
 		return out, err
 	}
-	lhs1, err1 := toRPN(toks, lhs, "left")
+	lhs1, err1 := toRPN(src, lhs, "left")
 	if err1 != nil {
 		return out, err1
 	}
-	rhs1, err2 := toRPN(toks, rhs, "left")
+	rhs1, err2 := toRPN(src, rhs, "left")
 	if err2 != nil {
 		return out, err2
 	}
 	rhs2 := simplifyHs(rhs1)
 	lhs2 := simplifyHs(lhs1)
-	if err := checkRecDef(toks, lhs2, rhs2); err != nil {
+	if err := checkRecDef(src, lhs2, rhs2); err != nil {
 		return out, err
 	}
 	out1, err3 := makeRule(lhs1, rhs2)
@@ -119,37 +118,17 @@ func parseRule(toks []string) ([]Rule, error) {
 	return out1, nil
 }
 
-func splitHs(toks []string) (string, string) {
-	lhs := ""
-	rhs := ""
-	left := true
-	for _, s := range toks {
-		if s == "=>" {
-			toks = toks[:1]
-			left = false
-		} else if left {
-			lhs += s
-			toks = toks[:1]
-		} else {
-			rhs += s
-			toks = toks[:1]
-		}
-	}
-	return lhs, rhs
-}
-
-func checkHs(expr []string, rule string, set string, hs string) error {
-	estr := strings.Join(expr, " ")
+func checkHs(src string, rule string, set string, hs string) error {
 	if rule == "" {
 		err := "empty %s handside in rule `%s`"
-		return fmt.Errorf("error: "+err, hs, estr)
+		return fmt.Errorf("error: "+err, hs, src)
 	}
 	for _, c := range rule {
 		if c >= 'A' && c <= 'Z' || inSet(c, set) {
 			continue
 		} else {
 			err := "unknown literal `%c` in %s handside of rule `%s`"
-			return fmt.Errorf("error: "+err, c, hs, estr)
+			return fmt.Errorf("error: "+err, c, hs, src)
 		}
 	}
 	return nil
@@ -164,17 +143,16 @@ func inSet(c rune, s string) bool {
 	return false
 }
 
-func toRPN(src []string, expr string, hs string) (string, error) {
+func toRPN(src string, rule string, hs string) (string, error) {
 	prec := map[rune]int{
 		'^': 1,
 		'|': 2,
 		'+': 4,
 		'!': 8,
 	}
-	estr := strings.Join(src, " ")
 	stack := []rune{}
 	queue := []rune{}
-	for _, c := range expr {
+	for _, c := range rule {
 		if c >= 'A' && c <= 'Z' {
 			queue = append(queue, c)
 		} else if c == '!' || c == '+' || c == '|' || c == '^' {
@@ -192,16 +170,17 @@ func toRPN(src []string, expr string, hs string) (string, error) {
 			}
 			if len(stack) == 0 {
 				err := "error: mismatched parentheses in %s handside `%s` of rule `%s`"
-				return string(queue), fmt.Errorf(err, hs, expr, estr)
+				return string(queue), fmt.Errorf(err, hs, rule, src)
 			}
 			if stack[len(stack)-1] == '(' {
 				stack = stack[:len(stack)-1]
 			} else {
 				err := "error: mismatched parentheses in %s handside `%s` of rule `%s`"
-				return string(queue), fmt.Errorf(err, hs, expr, estr)
+				return string(queue), fmt.Errorf(err, hs, rule, src)
 			}
 		} else {
-			panic("error: unreachable code")
+			err := "unknown literal `%c` in `%s`"
+			return string(queue), fmt.Errorf("i-error: "+err, c, "toRPN")
 		}
 
 	}
@@ -209,7 +188,7 @@ func toRPN(src []string, expr string, hs string) (string, error) {
 		c := stack[len(stack)-1]
 		if c == '(' || c == ')' {
 			err := "error: mismatched parentheses in %s handside `%s` of rule `%s`"
-			return string(queue), fmt.Errorf(err, hs, expr, estr)
+			return string(queue), fmt.Errorf(err, hs, rule, src)
 		}
 		queue = append(queue, stack[len(stack)-1])
 		stack = stack[:len(stack)-1]
@@ -267,9 +246,8 @@ func makeNode(lhs string) (TreeNode, error) {
 				gType: getType(c),
 				next:  nil,
 			}
-
 			if len(stack) == 0 {
-				return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
+				return tree, fmt.Errorf("i-error: stack underflow in `makeNode`")
 			}
 			t1 = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
@@ -284,13 +262,13 @@ func makeNode(lhs string) (TreeNode, error) {
 				right: nil,
 			}
 			if len(stack) == 0 {
-				return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
+				return tree, fmt.Errorf("i-error: stack underflow in `makeNode`")
 			}
 			t1 = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 
 			if len(stack) == 0 {
-				return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
+				return tree, fmt.Errorf("i-error: stack underflow in `makeNode`")
 			}
 			t2 = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
@@ -302,9 +280,8 @@ func makeNode(lhs string) (TreeNode, error) {
 			stack = append(stack, tree)
 		}
 	}
-	// TODO: check against empty stack
 	if len(stack) == 0 {
-		return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
+		return tree, fmt.Errorf("i-error: stack underflow in `makeNode`")
 	}
 	tree = stack[len(stack)-1]
 	return tree, nil
@@ -325,25 +302,24 @@ func getType(c rune) GType {
 	}
 }
 
-func checkRecDef(_src []string, lhs string, rhs string) error {
-	src := strings.Join(_src, " ")
+func checkRecDef(src string, lhs string, rhs string) error {
 	tmp := [26]int{0}
 	for _, c := range lhs {
 		if c >= 'A' && c <= 'Z' {
 			tmp[int(c)-int('A')] += 1
 		} else {
-			err := "unknown literal `%c` found in expression `%s`"
+			err := "unknown literal `%c` in expression `%s`"
 			return fmt.Errorf("error: "+err, c, src)
 		}
 	}
 	for _, c := range rhs {
 		if c >= 'A' && c <= 'Z' {
 			if tmp[int(c)-int('A')] != 0 {
-				err := "recursive definition of `%c` found in expression `%s`"
+				err := "recursive definition of `%c` in expression `%s`"
 				return fmt.Errorf("error: "+err, c, src)
 			}
 		} else {
-			err := "unknown literal `%c` found in expression `%s`"
+			err := "unknown literal `%c` in expression `%s`"
 			return fmt.Errorf("error: "+err, c, src)
 		}
 	}

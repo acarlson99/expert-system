@@ -11,7 +11,9 @@ var verbose = false
 func main() {
 	f := GetFacts()
 	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
+	cnt := 0
+	for repl(fmt.Sprintf("@%d: ", cnt), scanner) {
+		cnt += 1
 		toks := Scan(scanner.Text())
 
 		// prog, err = Parse(toks)
@@ -22,6 +24,7 @@ func main() {
 
 		var prog interface{}
 		var err error
+		/* TODO: make work with new return
 		if toks[0][0] == 'v' { // TODO: remove
 			verbose = verbose != true
 			continue
@@ -31,11 +34,11 @@ func main() {
 			}
 			continue
 		} else {
-			prog, err = Parse(toks)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
+		*/
+		prog, err = Parse(toks)
+		if err != nil {
+			fmt.Println(err)
+			continue
 		}
 
 		switch t := prog.(type) {
@@ -61,6 +64,12 @@ func main() {
 		}
 	}
 	if scanner.Err() != nil {
-		// TODO: hadle error
+		fmt.Println("error: %s", scanner.Err())
+		return
 	}
+}
+
+func repl(prompt string, scanner *bufio.Scanner) bool {
+	fmt.Print(prompt)
+	return scanner.Scan()
 }

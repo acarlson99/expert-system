@@ -7,3 +7,27 @@ TODO:
       A => A smashes that stack
   - Add ability to remove rules
   - Make whitespace insignificant in parser
+  - Be able to read from files
+  - Possible logic bug:
+```
+    A=>C+D
+    =A
+    65
+
+    ?A
+    65
+    [true]
+
+    ?C
+    67
+    [true]
+
+    C=>Z
+    ?Z
+    90
+    [false]
+    
+    ?C
+    67
+    [true]
+```

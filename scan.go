@@ -14,6 +14,6 @@ func uncomment(txt string) string {
 	}
 }
 
-func Scan(src string) []string {
-	return strings.Fields(uncomment(src))
+func Scan(src string) string {
+	return strings.Join(strings.Fields(uncomment(src)), " ")
 }
