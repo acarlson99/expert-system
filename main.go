@@ -24,9 +24,17 @@ func main() {
 		case []byte:
 			switch t[0] {
 			case '=':
-				// TODO: assign
+				// TODO: remove panics
+				err := f.UserSet(t[1:])
+				if err != nil {
+					panic(err)
+				}
 			case '?':
-				f.UserQuery(t)
+				ret, err := f.UserQuery(t[1:])
+				if err != nil {
+					panic(err)
+				}
+				fmt.Println(ret)
 			default:
 				panic("ahhh")
 			}
