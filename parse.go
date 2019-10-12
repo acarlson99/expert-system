@@ -112,8 +112,11 @@ func parseRule(toks []string) ([]Rule, error) {
 	if err := checkRecDef(toks, lhs2, rhs2); err != nil {
 		return out, err
 	}
-	out = makeRule(lhs1, rhs2)
-	return out, nil
+	out1, err3 := makeRule(lhs1, rhs2)
+	if err3 != nil {
+		return out1, err3
+	}
+	return out1, nil
 }
 
 func splitHs(toks []string) (string, string) {
@@ -232,18 +235,20 @@ func strrev(s string) string {
 	return string(runes)
 }
 
-func makeRule(lhs string, rhs string) []Rule {
+func makeRule(lhs string, rhs string) ([]Rule, error) {
 	out := []Rule{}
 	rrhs := strrev(rhs)
 	for _, c := range rrhs {
-		// TODO: check error
-		node, _ := makeNode(lhs)
+		node, err := makeNode(lhs)
+		if err != nil {
+			return out, err
+		}
 		out = append(out, Rule{
 			id:   c,
 			node: node,
 		})
 	}
-	return out
+	return out, nil
 }
 
 func makeNode(lhs string) (TreeNode, error) {
@@ -258,16 +263,21 @@ func makeNode(lhs string) (TreeNode, error) {
 			tree = &Value{ch: byte(c)}
 			stack = append(stack, tree)
 		} else if c == '!' {
-			// TODO: implement
 			tmp := &UnaryGate{
 				gType: getType(c),
 				next:  nil,
 			}
-			_ = tmp
+
 			if len(stack) == 0 {
 				return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
 			}
-		} else { // TODO: handle not
+			t1 = stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+
+			tmp.next = t1
+			tree = tmp
+			stack = append(stack, tree)
+		} else {
 			tmp := &BinaryGate{
 				gType: getType(c),
 				left:  nil,
@@ -278,6 +288,7 @@ func makeNode(lhs string) (TreeNode, error) {
 			}
 			t1 = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
+
 			if len(stack) == 0 {
 				return tree, fmt.Errorf("i-error: stack underflow on `makeNode`")
 			}
