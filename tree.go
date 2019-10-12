@@ -52,7 +52,6 @@ func (t GType) String() string {
 }
 
 // Unary gate
-
 type UnaryGate struct {
 	gType GType
 	next  TreeNode
