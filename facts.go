@@ -73,6 +73,7 @@ func (f *Facts) UserQuery(cs []byte) []bool {
 }
 
 func (f *Facts) AddRule(c byte, t TreeNode) {
+	f.SoftReset()
 	fact := &f.f[c-'A']
 	if fact.rule == nil {
 		fact.rule = t

@@ -24,6 +24,7 @@ func Parse(src string) (interface{}, error) {
 		return parseRule(src, lhs, rhs)
 	} else if src == "v" || src == "verbose" {
 		verbose = verbose != true
+		fmt.Println("verbose =", verbose)
 	} else {
 		err := "error: unknown expression `%s`"
 		return nil, fmt.Errorf("error: "+err, src)
