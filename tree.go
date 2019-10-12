@@ -41,7 +41,7 @@ func (t GType) String() string {
 	case GateNot:
 		return "!"
 	case GateAnd:
-		return "&"
+		return "+"
 	case GateOr:
 		return "|"
 	case GateXor:

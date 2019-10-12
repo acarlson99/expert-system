@@ -6,4 +6,5 @@ TODO:
   - Recursive definitions:
       A => A smashes that stack
   - Add ability to remove rules
-    - Make whitespace insignificant in parser
+  - Make whitespace insignificant in parser
+  - ((C | A) | ((A & (C & (D & (E & F)))) | (D | (C | A)))) => B breaks parser somehow
