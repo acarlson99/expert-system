@@ -81,23 +81,32 @@ func query(src string) ([]rune, error) {
 
 // @rule
 
-func parseRule(toks []string) (string, error) {
+type Rule struct {
+	id   rune
+	node TreeNode
+}
+
+func parseRule(toks []string) ([]Rule, error) {
+	out := []Rule{}
 	lhs, rhs := splitHs(toks)
 	if err := checkHs(toks, lhs, "()!+|^", "left"); err != nil {
-		return "", err
+		return out, err
 	}
 	if err := checkHs(toks, rhs, "()+", "right"); err != nil {
-		return "", err
+		return out, err
 	}
 	lhs1, err1 := toRPN(toks, lhs, "left")
 	if err1 != nil {
-		return "", err1
+		return out, err1
 	}
 	rhs1, err2 := toRPN(toks, rhs, "left")
 	if err2 != nil {
-		return "", err2
+		return out, err2
 	}
-	return lhs1 + rhs1, nil
+	rhs2 := simplifyRhs(rhs1)
+	// TODO: check against recursive definitons?
+	out = makeRule(lhs1, rhs2)
+	return out, nil
 }
 
 func splitHs(toks []string) (string, string) {
@@ -196,4 +205,84 @@ func toRPN(src []string, expr string, hs string) (string, error) {
 		stack = stack[:len(stack)-1]
 	}
 	return string(queue), nil
+}
+
+func simplifyRhs(rhs string) string {
+	out := ""
+	for _, c := range rhs {
+		if c >= 'A' && c <= 'Z' {
+			out += string(c)
+		}
+	}
+	return out
+}
+
+func strrev(s string) string {
+	runes := []rune(s)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
+	}
+	return string(runes)
+}
+
+func makeRule(lhs string, rhs string) []Rule {
+	out := []Rule{}
+	rrhs := strrev(rhs)
+	for _, c := range rrhs {
+		out = append(out, Rule{
+			id:   c,
+			node: makeNode(lhs),
+		})
+	}
+	return out
+}
+
+func makeNode(lhs string) TreeNode {
+	stack := []TreeNode{}
+	var tree TreeNode
+	var t1 TreeNode
+	var t2 TreeNode
+	_ = t1
+	_ = t2
+	for _, c := range lhs {
+		if c >= 'A' && c <= 'Z' {
+			tree = &Value{ch: byte(c)}
+			stack = append(stack, tree)
+		} else { // TODO: handle not
+			tmp := &BinaryGate{
+				gType: getType(c),
+				left:  nil,
+				right: nil,
+			}
+			// TODO: check against zero size stack in both pops
+			t1 = stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			t2 = stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+
+			tmp.right = t1
+			tmp.left = t2
+
+			tree = tmp
+			stack = append(stack, tree)
+		}
+	}
+	// TODO: check against empty stack
+	tree = stack[len(stack)-1]
+	return tree
+}
+
+func getType(c rune) GType {
+	switch c {
+	case '!':
+		return GateNot
+	case '+':
+		return GateAnd
+	case '|':
+		return GateOr
+	case '^':
+		return GateXor
+	default:
+		return GateNot
+	}
 }
