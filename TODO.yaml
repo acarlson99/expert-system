@@ -3,10 +3,7 @@ TODO:
       A => B
       ?B
       This evaluated A twice
-  - Recursive definitions:
-      A => A smashes that stack
   - Add ability to remove rules
-  - Make whitespace insignificant in parser
   - Be able to read from files
   - Possible logic bug:
 ```
@@ -31,3 +28,4 @@ TODO:
     67
     [true]
 ```
+    - Logic seems to be broken, check test cases

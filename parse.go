@@ -48,8 +48,7 @@ type Assign []byte
 func assign(src string) (Assign, error) {
 	out := []byte{}
 	if len(src) == 1 {
-		err := "empty right handside in assignment"
-		return out, fmt.Errorf("error: " + err)
+		return out, nil
 	}
 	for _, c := range src[1:] {
 		fmt.Println(c)
@@ -68,8 +67,7 @@ type Query []byte
 func query(src string) (Query, error) {
 	out := []byte{}
 	if len(src) == 1 {
-		err := "empty right handside in query"
-		return out, fmt.Errorf("error: " + err)
+		return out, nil
 	}
 	for _, c := range src[1:] {
 		fmt.Println(c)

@@ -9,21 +9,28 @@ import (
 var verbose = false
 
 func main() {
-	f := GetFacts()
+	prog := GetFacts()
+	// read from file
+	if len(os.Args) == 2 {
+		file, err := os.Open(os.Args[1])
+		if err != nil {
+			fmt.Printf("error: could not read from `%s`", os.Args[1])
+		}
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			eval(prog, scanner.Text())
+		}
+		if scanner.Err() != nil {
+			fmt.Printf("error: %s\n", scanner.Err())
+		}
+	}
+	// enter REPL
 	scanner := bufio.NewScanner(os.Stdin)
 	cnt := 0
-	for repl(fmt.Sprintf("@%d: ", cnt), scanner) {
+	for readline(fmt.Sprintf("@%d: ", cnt), scanner) {
 		cnt += 1
-		toks := Scan(scanner.Text())
-
-		// prog, err = Parse(toks)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	continue
-		// }
-
-		var prog interface{}
-		var err error
+		eval(prog, scanner.Text())
 		/* TODO: make work with new return
 		if toks[0][0] == 'v' { // TODO: remove
 			verbose = verbose != true
@@ -35,41 +42,51 @@ func main() {
 			continue
 		} else {
 		*/
-		prog, err = Parse(toks)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
 
-		switch t := prog.(type) {
-		case []Rule:
-			for _, r := range t {
-				f.AddRule(byte(r.id), r.node)
-			}
-		case Query:
-			ret, err := f.UserQuery(t)
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println(ret)
-		case Assign:
-			// TODO: remove panics
-			err := f.UserSet(t)
-			if err != nil {
-				panic(err)
-			}
-		default:
-			fmt.Printf("%T: %+v\n", prog, prog)
-			panic("Bad return from Parse")
-		}
 	}
 	if scanner.Err() != nil {
-		fmt.Println("error: %s", scanner.Err())
-		return
+		fmt.Printf("error: %s\n", scanner.Err())
 	}
 }
 
-func repl(prompt string, scanner *bufio.Scanner) bool {
+func readline(prompt string, scanner *bufio.Scanner) bool {
 	fmt.Print(prompt)
 	return scanner.Scan()
+}
+
+func eval(prog *Facts, src string) {
+	ret, err := Parse(Scan(src))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	switch t := ret.(type) {
+	case nil:
+		return
+	case Assign:
+		if len(t) == 0 {
+			return
+		}
+		if prog.UserSet(t) != nil {
+			fmt.Println(err)
+			return
+		}
+	case Query:
+		if len(t) == 0 {
+			return
+		}
+		ret, err := prog.UserQuery(t)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(ret)
+	case []Rule:
+		for _, r := range t {
+			prog.AddRule(byte(r.id), r.node)
+		}
+	default:
+		fmt.Printf("i-error: unknown parse return (%T,%+v)\n", ret, ret)
+		return
+	}
 }
