@@ -17,10 +17,6 @@ A | B + C => E
 
 =AC
 ?E  # E = true
-# The correction sheet says false, but that would not make sense
-# because + has a greater precedence than |, so the first expression would be
-# (A | B) + C => E
-# which would be true as long as C and either A or B are true
 
 =BC
 ?E  # E = true
