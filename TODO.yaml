@@ -1,0 +1,7 @@
+TODO:
+  - Multiple evaluation:
+      A => B
+      ?B
+      This evaluated A twice
+  - Recursive definitions:
+      A => A smashes that stack
