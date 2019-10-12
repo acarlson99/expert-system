@@ -15,7 +15,6 @@ type Value struct {
 func (v *Value) Evaluate() bool {
 	facts := GetFacts()
 
-	// value, _ := facts.Query(v.ch) // TODO: this makes things evaluate twice.  Fix
 	value := facts.Get(v.ch).Query()
 	if verbose {
 		fmt.Printf("%c = %v\n", v.ch, value)

@@ -1,30 +1,22 @@
 TODO:
+  - Add ability to remove rules
+  - Test cases seem to broken, check logic
+  - Logic seems to be broken, check test cases
+
+DONE:
   - Multiple evaluation:
       A => B
       ?B
       This evaluated A twice
-  - Add ability to remove rules
   - Possible logic bug:
-```
-    A=>C+D
-    =A
-    65
-
-    ?A
-    65
-    [true]
-
-    ?C
-    67
-    [true]
-
-    C=>Z
-    ?Z
-    90
-    [false]
-    
-    ?C
-    67
-    [true]
-```
-    - Logic seems to be broken, check test cases
+      A=>C+D
+      =A
+      ?A
+      [true]
+      ?C
+      [true]
+      C=>Z
+      ?Z
+      [false]
+      ?C
+      [true]
