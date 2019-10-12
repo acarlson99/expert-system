@@ -8,7 +8,7 @@ type Fact struct {
 	// whether or not Fact has been set or implicit
 	set bool
 	// rule
-	r TreeNode
+	rule TreeNode
 	// user defined or inferred by system
 	userdefined bool
 }
@@ -38,7 +38,7 @@ func (f *Facts) Reset() {
 func (f *Facts) SoftReset() {
 	for ii := range f.f {
 		if !f.f[ii].userdefined {
-			f.f[ii] = Fact{false, false, f.f[ii].r, false}
+			f.f[ii] = Fact{false, false, f.f[ii].rule, false}
 		}
 	}
 }
@@ -66,7 +66,7 @@ func (f *Facts) Query(c byte) (bool, error) {
 	fact := &f.f[c-'A']
 	if a, _ := f.IsSet(c); a {
 		return fact.t, nil
-	} else if fact.r != nil {
+	} else if fact.rule != nil {
 		err := f.Evaluate(c)
 		if err != nil {
 			return false, err
@@ -123,11 +123,11 @@ func (f *Facts) AddRule(c byte, t TreeNode) error {
 		return fmt.Errorf("Assigning nil rule to variable '%c'", c)
 	}
 	fact := &f.f[c-'A']
-	if fact.r == nil {
-		fact.r = t
+	if fact.rule == nil {
+		fact.rule = t
 	} else {
-		constructed := &BinaryGate{GateOr, t, fact.r}
-		fact.r = constructed
+		constructed := &BinaryGate{GateOr, t, fact.rule}
+		fact.rule = constructed
 	}
 	return nil
 }
@@ -137,13 +137,13 @@ func (f *Facts) Evaluate(c byte) error {
 		return fmt.Errorf("Variable '%c' not available", c)
 	}
 	fact := &f.f[c-'A']
-	if fact.r == nil {
+	if fact.rule == nil {
 		return nil
 	}
 	if verbose { // TODO: kill
 		fmt.Println("CALLING EVALUATE ON", c)
 	}
-	value := fact.r.Evaluate()
+	value := fact.rule.Evaluate()
 	if !fact.set && value {
 		return f.Set(c, value)
 	}
