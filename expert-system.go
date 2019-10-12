@@ -52,9 +52,6 @@ func eval(prog *Facts, src string) {
 	case nil:
 		return
 	case Assign:
-		if len(t) <= 0 {
-			return
-		}
 		prog.UserSet(t)
 	case Query:
 		if len(t) > 0 {
