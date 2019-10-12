@@ -20,7 +20,9 @@ func main() {
 		}
 		switch t := prog.(type) {
 		case []Rule:
-			f.AddRule(byte(t[0].id), t[0].node)
+			for _, r := range t {
+				f.AddRule(byte(r.id), r.node)
+			}
 		case []byte:
 			switch t[0] {
 			case '=':
