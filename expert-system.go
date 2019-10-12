@@ -52,13 +52,13 @@ func eval(prog *Facts, src string) {
 	case nil:
 		return
 	case Assign:
-		if len(t) > 0 && prog.UserSet(t) != nil {
-			fmt.Println(err)
+		if len(t) <= 0 {
 			return
 		}
+		prog.UserSet(t)
 	case Query:
 		if len(t) > 0 {
-			ret, err := prog.UserQuery(t)
+			ret := prog.UserQuery(t)
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -79,7 +79,7 @@ func eval(prog *Facts, src string) {
 			if f.rule != nil {
 				str = fmt.Sprintf("; %s => %c", f.rule.String(), i+'A')
 			}
-			fmt.Printf("[%c]: %t%s\n", i+'A', f.t, str)
+			fmt.Printf("[%c]: %t%s\n", i+'A', f.truth, str)
 		}
 	}
 }

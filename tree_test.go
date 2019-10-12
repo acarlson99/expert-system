@@ -6,10 +6,8 @@ import (
 
 func TestEvaluate(t *testing.T) {
 	f := GetFacts()
-	f.Reset()
-	f.Set('A', true)
-	f.Set('B', true)
-	f.Set('C', true)
+	f.HardReset()
+	f.UserSet([]byte{'A', 'B', 'C'})
 
 	// !A ^ (B & C) => D
 	tree := &BinaryGate{GateXor,
@@ -28,10 +26,9 @@ func TestEvaluate(t *testing.T) {
 
 func TestValue(t *testing.T) {
 	f := GetFacts()
-	f.Reset()
+	f.HardReset()
 
-	f.Set('A', true)
-	f.Set('B', false)
+	f.UserSet([]byte{'A'})
 
 	trees := []TreeNode{
 		&Value{'A'},
@@ -49,10 +46,9 @@ func TestValue(t *testing.T) {
 
 func TestNot(t *testing.T) {
 	f := GetFacts()
-	f.Reset()
+	f.HardReset()
 
-	f.Set('A', true)
-	f.Set('B', false)
+	f.UserSet([]byte{'A'})
 
 	trees := []TreeNode{
 		// !A
@@ -74,10 +70,8 @@ func TestNot(t *testing.T) {
 
 func TestAnd(t *testing.T) {
 	f := GetFacts()
-	f.Reset()
-	f.Set('A', true)
-	f.Set('B', false)
-	f.Set('C', true)
+	f.HardReset()
+	f.UserSet([]byte{'A', 'C'})
 
 	trees := []TreeNode{
 		// A + B
@@ -107,12 +101,9 @@ func TestAnd(t *testing.T) {
 
 func TestOr(t *testing.T) {
 	f := GetFacts()
-	f.Reset()
+	f.HardReset()
 
-	f.Set('A', true)
-	f.Set('B', true)
-	f.Set('C', false)
-	f.Set('D', false)
+	f.UserSet([]byte{'A', 'B'})
 
 	trees := []TreeNode{
 		// A | B
@@ -142,12 +133,9 @@ func TestOr(t *testing.T) {
 
 func TestXor(t *testing.T) {
 	f := GetFacts()
-	f.Reset()
+	f.HardReset()
 
-	f.Set('A', true)
-	f.Set('B', true)
-	f.Set('C', false)
-	f.Set('D', false)
+	f.UserSet([]byte{'A', 'B'})
 
 	trees := []TreeNode{
 		// A ^ B
