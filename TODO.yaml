@@ -6,3 +6,4 @@ TODO:
   - Recursive definitions:
       A => A smashes that stack
   - Add ability to remove rules
+    - Make whitespace insignificant in parser
