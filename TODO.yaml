@@ -5,3 +5,4 @@ TODO:
       This evaluated A twice
   - Recursive definitions:
       A => A smashes that stack
+    - Make whitespace insignificant in parser

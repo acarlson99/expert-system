@@ -107,8 +107,11 @@ func parseRule(toks []string) ([]Rule, error) {
 	if err2 != nil {
 		return out, err2
 	}
-	rhs2 := simplifyRhs(rhs1)
-	// TODO: check against recursive definitons?
+	rhs2 := simplifyHs(rhs1)
+	lhs2 := simplifyHs(lhs1)
+	if err := checkRecDef(toks, lhs2, rhs2); err != nil {
+		return out, err
+	}
 	out = makeRule(lhs1, rhs2)
 	return out, nil
 }
@@ -211,7 +214,7 @@ func toRPN(src []string, expr string, hs string) (string, error) {
 	return string(queue), nil
 }
 
-func simplifyRhs(rhs string) string {
+func simplifyHs(rhs string) string {
 	out := ""
 	for _, c := range rhs {
 		if c >= 'A' && c <= 'Z' {
@@ -289,4 +292,29 @@ func getType(c rune) GType {
 	default:
 		return GateNot
 	}
+}
+
+func checkRecDef(_src []string, lhs string, rhs string) error {
+	src := strings.Join(_src, " ")
+	tmp := [26]int{0}
+	for _, c := range lhs {
+		if c >= 'A' && c <= 'Z' {
+			tmp[int(c)-int('A')] += 1
+		} else {
+			err := "unknown literal `%c` found in expression `%s`"
+			return fmt.Errorf("error: "+err, c, src)
+		}
+	}
+	for _, c := range rhs {
+		if c >= 'A' && c <= 'Z' {
+			if tmp[int(c)-int('A')] != 0 {
+				err := "recursive definition of `%c` found in expression `%s`"
+				return fmt.Errorf("error: "+err, c, src)
+			}
+		} else {
+			err := "unknown literal `%c` found in expression `%s`"
+			return fmt.Errorf("error: "+err, c, src)
+		}
+	}
+	return nil
 }
