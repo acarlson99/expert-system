@@ -1,45 +1,75 @@
 package main
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
 	"os"
+
+	"github.com/chzyer/readline"
 )
 
 var verbose = false
 
+func usage() {
+	fmt.Println("usage: ./expert-system [options] [file]")
+	flag.PrintDefaults()
+}
+
 func main() {
+	flag.Usage = usage
+
+	var loadFile bool
+	flag.BoolVar(&loadFile, "f", false, "Evaluate file and load repl")
+
+	flag.Parse()
+
+	args := flag.Args()
+
 	prog := GetFacts()
-	// read from file
-	if len(os.Args) == 2 {
-		file, err := os.Open(os.Args[1])
+
+	switch len(args) {
+	case 1:
+		// file passed as arg
+		file, err := os.Open(args[0])
 		if err != nil {
-			fmt.Printf("error: could not read from `%s`", os.Args[1])
+			fmt.Printf("error: could not open file `%s`\n", args[0])
+			os.Exit(1)
 		}
 		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			eval(prog, scanner.Text())
+		err = ParseFile(file, prog, false)
+		if err != nil {
+			panic(err)
 		}
-		if scanner.Err() != nil {
-			fmt.Printf("error: %s\n", scanner.Err())
+		// only eval file or load data into repl
+		if !loadFile {
+			os.Exit(0)
 		}
+	case 0:
+		break
+	default:
+		usage()
 	}
+
 	// enter REPL
-	scanner := bufio.NewScanner(os.Stdin)
-	cnt := 0
-	for readline(fmt.Sprintf("@%d: ", cnt), scanner) {
-		cnt += 1
-		eval(prog, scanner.Text())
-	}
-	if scanner.Err() != nil {
-		fmt.Printf("error: %s\n", scanner.Err())
+	err := ParseFile(os.Stdin, prog, true)
+	if err != nil {
+		panic(err)
 	}
 }
 
-func readline(prompt string, scanner *bufio.Scanner) bool {
-	fmt.Print(prompt)
-	return scanner.Scan()
+func ParseFile(file *os.File, prog *Facts, setPrompt bool) error {
+	rcloser := NewRCloser(file)
+	var conf readline.Config
+	conf.Stdin = rcloser
+	if setPrompt {
+		conf.Prompt = "> "
+	}
+	rl, err := readline.NewEx(&conf)
+	defer rl.Close()
+	for line, err := rl.Readline(); err == nil; line, err = rl.Readline() {
+		eval(prog, line)
+	}
+	return err
 }
 
 func eval(prog *Facts, src string) {

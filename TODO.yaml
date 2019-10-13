@@ -2,6 +2,8 @@ TODO:
   - Add ability to remove rules
   - Test cases seem to broken, check logic
   - Logic seems to be broken, check test cases
+  - Graph visualization
+  - Reset rules, etc.
 
 DONE:
   - Multiple evaluation:
