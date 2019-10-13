@@ -1,6 +1,6 @@
 # Rules
 B + C => A
-D ^ A => B
+D ^ E => B
 B => C
 
 # Facts and Queries

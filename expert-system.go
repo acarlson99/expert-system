@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/chzyer/readline"
 	"os"
 	"strings"
+
+	"github.com/chzyer/readline"
 )
 
 var verbose = false
@@ -119,14 +120,5 @@ func eval(prog *Facts, src string) {
 	default:
 		fmt.Printf("i-error: unknown parse return (%T,%+v)\n", ret, ret)
 		return
-	}
-	if verbose {
-		for i, f := range prog.f {
-			str := ""
-			if f.rule != nil {
-				str = fmt.Sprintf("; %s => %c", f.rule.String(), i+'A')
-			}
-			fmt.Printf("[%c]: %t%s\n", i+'A', f.truth, str)
-		}
 	}
 }
