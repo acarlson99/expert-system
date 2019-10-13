@@ -127,14 +127,16 @@ func parseRule(src string, lhs string, rhs string) ([]Rule, error) {
 	if err := checkHs(src, rhs, "()+", "right"); err != nil {
 		return out, err
 	}
-	lhs1, err1 := toRPN(src, lhs, "left")
+	lhs1, err1 := toRPN(lhs)
 	if err1 != nil {
 		return out, err1
 	}
-	rhs1, err2 := toRPN(src, rhs, "left")
+	rhs1, err2 := toRPN(rhs)
 	if err2 != nil {
 		return out, err2
 	}
+	rhs1 = cleanNot(rhs1)
+	lhs1 = cleanNot(lhs1)
 	rhs2 := simplifyHs(rhs1)
 	lhs2 := simplifyHs(lhs1)
 	if err := checkRecDef(src, lhs2, rhs2); err != nil {
@@ -145,6 +147,16 @@ func parseRule(src string, lhs string, rhs string) ([]Rule, error) {
 		return out1, err3
 	}
 	return out1, nil
+}
+
+func cleanNot(src string) string {
+	out := []byte{}
+	for _, c := range src {
+		if c != '#' {
+			out = append(out, byte(c))
+		}
+	}
+	return string(out)
 }
 
 func checkHs(src string, rule string, set string, hs string) error {
@@ -172,61 +184,58 @@ func inSet(c rune, s string) bool {
 	return false
 }
 
-func toRPN(src string, rule string, hs string) (string, error) {
+func toRPN(infix string) (string, error) {
 	prec := map[rune]int{
 		'^': 1,
 		'|': 2,
 		'+': 4,
 		'!': 8,
 	}
-	stack := []rune{}
-	queue := []rune{}
-	for _, c := range rule {
-		rightassoc := c == '!'
+	out_queue := []byte{}
+	op_stack := []byte{}
+
+	for _, c := range infix {
+		right_assoc := c == '!'
 		if c >= 'A' && c <= 'Z' {
-			queue = append(queue, c)
-		} else if c == '!' || c == '+' || c == '|' || c == '^' {
-			if len(stack)-1 > 0 {
-				pt := prec[stack[len(stack)-1]]
-				pc := prec[c]
-				for pc < pt || (pc == pt && !rightassoc) {
-					queue = append(queue, stack[len(stack)-1])
-					stack = stack[:len(stack)-1]
-					if len(stack)-1 <= 0 {
-						break
-					}
-				}
+			out_queue = append(out_queue, byte(c))
+		} else if inSet(rune(c), "^|+!") {
+			if c == '!' {
+				out_queue = append(out_queue, '#')
 			}
-			stack = append(stack, c)
+			p := prec[c]
+			for len(op_stack) > 0 && ((prec[rune(op_stack[len(op_stack)-1])] > p) ||
+				((prec[rune(op_stack[len(op_stack)-1])] == p) && !right_assoc)) &&
+				(op_stack[len(op_stack)-1] != '(') {
+				out_queue = append(out_queue, op_stack[len(op_stack)-1])
+				op_stack = op_stack[:len(op_stack)-1]
+			}
+			op_stack = append(op_stack, byte(c))
 		} else if c == '(' {
-			stack = append(stack, c)
+			op_stack = append(op_stack, byte(c))
 		} else if c == ')' {
-			for len(stack)-1 > 0 && stack[len(stack)-1] != '(' {
-				queue = append(queue, stack[len(stack)-1])
-				stack = stack[:len(stack)-1]
+			for len(op_stack) > 0 && op_stack[len(op_stack)-1] != '(' {
+				out_queue = append(out_queue, op_stack[len(op_stack)-1])
+				op_stack = op_stack[:len(op_stack)-1]
 			}
-			if len(stack) == 0 {
-				err := "error: mismatched parentheses in %s handside `%s` of rule `%s`"
-				return string(queue), fmt.Errorf(err, hs, rule, src)
+			if len(op_stack) == 0 {
+				err := "mismatched parentheses in `%s`"
+				return "", fmt.Errorf("error: "+err, infix)
 			}
-			if stack[len(stack)-1] == '(' {
-				stack = stack[:len(stack)-1]
-			} else {
-				err := "error: mismatched parentheses in %s handside `%s` of rule `%s`"
-				return string(queue), fmt.Errorf(err, hs, rule, src)
+			if len(op_stack) > 0 && op_stack[len(op_stack)-1] == '(' {
+				op_stack = op_stack[:len(op_stack)-1]
 			}
-		} //TODO: add error here
-	}
-	for len(stack) > 0 {
-		c := stack[len(stack)-1]
-		if c == '(' || c == ')' {
-			err := "error: mismatched parentheses in %s handside `%s` of rule `%s`"
-			return string(queue), fmt.Errorf(err, hs, rule, src)
 		}
-		queue = append(queue, stack[len(stack)-1])
-		stack = stack[:len(stack)-1]
 	}
-	return string(queue), nil
+	for len(op_stack) > 0 {
+		c := op_stack[len(op_stack)-1]
+		if inSet(rune(c), "()") {
+			err := "mismatched parentheses in `%s`"
+			return "", fmt.Errorf("error: "+err, infix)
+		}
+		out_queue = append(out_queue, byte(c))
+		op_stack = op_stack[:len(op_stack)-1]
+	}
+	return string(out_queue), nil
 }
 
 func simplifyHs(rhs string) string {
@@ -251,7 +260,6 @@ func makeRule(lhs string, rhs string) ([]Rule, error) {
 	out := []Rule{}
 	rrhs := strrev(rhs)
 	for _, c := range rrhs {
-		fmt.Println(lhs)
 		node, err := makeNode(lhs)
 		if err != nil {
 			return out, err
