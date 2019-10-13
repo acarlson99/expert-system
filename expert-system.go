@@ -30,6 +30,9 @@ func main() {
 	cnt := 0
 	for readline(fmt.Sprintf("@%d: ", cnt), scanner) {
 		cnt += 1
+		if scanner.Text() == "exit" {
+			return
+		}
 		eval(prog, scanner.Text())
 	}
 	if scanner.Err() != nil {
@@ -52,7 +55,7 @@ func eval(prog *Facts, src string) {
 	case nil:
 		return
 	case Assign:
-		if len(t) > 0 && prog.UserSet(t) != nil {
+		if prog.UserSet(t) != nil {
 			fmt.Println(err)
 			return
 		}
@@ -69,6 +72,7 @@ func eval(prog *Facts, src string) {
 		for _, r := range t {
 			prog.AddRule(byte(r.id), r.node)
 		}
+	// TODO: handle cut
 	default:
 		fmt.Printf("i-error: unknown parse return (%T,%+v)\n", ret, ret)
 		return

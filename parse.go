@@ -25,10 +25,38 @@ func Parse(src string) (interface{}, error) {
 	} else if src == "v" || src == "verbose" {
 		verbose = verbose != true
 	} else {
+		split := strings.Fields(src)
+		if len(split) > 0 && split[0] == "cut" {
+			return parseCut(split[1:])
+		}
 		err := "error: unknown expression `%s`"
 		return nil, fmt.Errorf("error: "+err, src)
 	}
 	return nil, nil
+}
+
+func parseCut(args []string) ([]byte, error) {
+	out := []byte{}
+	if len(args) < 2 {
+		err := "error: invalid argument count for `cut`\n" +
+			"usage: cut <A-Z> <l | r> [l | r ...]"
+		return out, fmt.Errorf(err)
+	} else if len(args[0]) != 1 || !(args[0][0] >= 'A' && args[0][0] <= 'Z') {
+		err := "error: invalid argument `%s` for `cut`" +
+			"usage: cut <A-Z> <l | r> [l | r ...]"
+		return out, fmt.Errorf(err, args[0])
+	}
+	out = append(out, args[0][0])
+	for _, s := range args[1:] {
+		if s == "l" || s == "r" {
+			out = append(out, s[0])
+		} else {
+			err := "error: invalid argument `%s` for `cut`" +
+				"usage: cut <A-Z> <l | r> [l | r ...]"
+			return out, fmt.Errorf(err, s)
+		}
+	}
+	return out, nil
 }
 
 // @unop
@@ -150,12 +178,20 @@ func toRPN(src string, rule string, hs string) (string, error) {
 		'+': 4,
 		'!': 8,
 	}
+	inpar := false
+	ustack := []rune{}
 	stack := []rune{}
 	queue := []rune{}
 	for _, c := range rule {
 		if c >= 'A' && c <= 'Z' {
 			queue = append(queue, c)
-		} else if c == '!' || c == '+' || c == '|' || c == '^' {
+		} else if c == '!' {
+			ustack = append(ustack, c)
+		} else if c == '+' || c == '|' || c == '^' {
+			if len(ustack) > 0 && !inpar {
+				queue = append(queue, ustack[len(ustack)-1])
+				ustack = ustack[:len(ustack)-1]
+			}
 			for len(stack)-1 > 0 && prec[stack[len(stack)-1]] > prec[c] {
 				queue = append(queue, stack[len(stack)-1])
 				stack = stack[:len(stack)-1]
@@ -163,6 +199,7 @@ func toRPN(src string, rule string, hs string) (string, error) {
 			stack = append(stack, c)
 		} else if c == '(' {
 			stack = append(stack, c)
+			inpar = true
 		} else if c == ')' {
 			for len(stack)-1 > 0 && stack[len(stack)-1] != '(' {
 				queue = append(queue, stack[len(stack)-1])
@@ -174,15 +211,20 @@ func toRPN(src string, rule string, hs string) (string, error) {
 			}
 			if stack[len(stack)-1] == '(' {
 				stack = stack[:len(stack)-1]
+				inpar = false
 			} else {
 				err := "error: mismatched parentheses in %s handside `%s` of rule `%s`"
 				return string(queue), fmt.Errorf(err, hs, rule, src)
 			}
-		} else {
-			err := "unknown literal `%c` in `%s`"
-			return string(queue), fmt.Errorf("i-error: "+err, c, "toRPN")
-		}
-
+			for len(ustack) > 0 && !inpar {
+				queue = append(queue, ustack[len(ustack)-1])
+				ustack = ustack[:len(ustack)-1]
+			}
+		} //TODO: add error here
+	}
+	for len(ustack) > 0 {
+		queue = append(queue, ustack[len(ustack)-1])
+		ustack = ustack[:len(ustack)-1]
 	}
 	for len(stack) > 0 {
 		c := stack[len(stack)-1]
@@ -218,6 +260,7 @@ func makeRule(lhs string, rhs string) ([]Rule, error) {
 	out := []Rule{}
 	rrhs := strrev(rhs)
 	for _, c := range rrhs {
+		fmt.Println(lhs)
 		node, err := makeNode(lhs)
 		if err != nil {
 			return out, err
@@ -249,10 +292,10 @@ func makeNode(lhs string) (TreeNode, error) {
 			if len(stack) == 0 {
 				return tree, fmt.Errorf("i-error: stack underflow in `makeNode`")
 			}
-			t1 = stack[len(stack)-1]
+			t2 = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 
-			tmp.next = t1
+			tmp.next = t2
 			tree = tmp
 			stack = append(stack, tree)
 		} else {
