@@ -213,5 +213,5 @@ func (g *BinaryGate) AddToGraph(graph *gographviz.Graph) (bool, string) {
 	if verbose {
 		fmt.Printf("%v %s %v = %v\n", left, g.gType, right, value)
 	}
-	return value, ""
+	return value, name
 }
