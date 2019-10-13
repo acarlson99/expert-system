@@ -17,10 +17,14 @@ func usage() {
 }
 
 func main() {
-	flag.Usage = usage
+	flag.Usage = func() {
+		usage()
+		os.Exit(0)
+	}
 
 	var loadFile bool
 	flag.BoolVar(&loadFile, "f", false, "Evaluate file and load repl")
+	flag.BoolVar(&verbose, "v", false, "Verbose")
 
 	flag.Parse()
 
@@ -49,6 +53,7 @@ func main() {
 		break
 	default:
 		usage()
+		os.Exit(1)
 	}
 
 	// enter REPL

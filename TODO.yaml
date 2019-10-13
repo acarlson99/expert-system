@@ -2,6 +2,8 @@ TODO:
   - Add ability to remove rules
   - Graph visualization
   - Reset rules, etc.
+  - Handle evaluation of things like 'A + B | C' without binding to variable
+  - Add help to interactive mode
 
 DONE:
   - Multiple evaluation:

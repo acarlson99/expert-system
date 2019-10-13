@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Fact struct {
 	truth       bool
 	visited     bool
@@ -66,6 +68,9 @@ func (f *Facts) UserSet(cs []byte) {
 func (f *Facts) UserQuery(cs []byte) []bool {
 	res := []bool{}
 	for _, c := range cs {
+		if verbose {
+			fmt.Printf("Querying %c\n", c)
+		}
 		val := f.f[c-'A'].Query()
 		res = append(res, val)
 	}
