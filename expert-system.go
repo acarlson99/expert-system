@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/chzyer/readline"
+	"os"
+	"strings"
 )
 
 var verbose = false
@@ -90,11 +90,12 @@ func eval(prog *Facts, src string) {
 				fmt.Println(err)
 				return
 			}
+			tmp := strings.Join(strings.Fields(src[1:]), "")
 			for ii, truth := range ret {
 				if ii != 0 {
-					fmt.Printf(", ")
+					fmt.Printf("\n")
 				}
-				fmt.Printf("%v", truth)
+				fmt.Printf("[%c] = %v", tmp[ii], truth)
 			}
 			fmt.Println()
 		}
@@ -102,6 +103,18 @@ func eval(prog *Facts, src string) {
 		for _, r := range t {
 			prog.AddRule(byte(r.id), r.node)
 		}
+	case Exit:
+		os.Exit(0)
+	case List:
+		for i, f := range prog.f {
+			str := ""
+			if f.rule != nil {
+				str = fmt.Sprintf("; %s => %c", f.rule.String(), i+'A')
+			}
+			fmt.Printf("[%c]: %t%s\n", i+'A', f.truth, str)
+		}
+	case Help:
+		fmt.Printf("TODO: print funs")
 	// TODO: handle cut
 	default:
 		fmt.Printf("i-error: unknown parse return (%T,%+v)\n", ret, ret)

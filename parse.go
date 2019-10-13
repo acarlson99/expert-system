@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+type Exit struct{}
+type List struct{}
+type Help struct{} // TODO: implement
+
 func Parse(src string) (interface{}, error) {
 	if len(src) == 0 {
 		return nil, nil
@@ -25,12 +29,16 @@ func Parse(src string) (interface{}, error) {
 	} else if src == "v" || src == "verbose" {
 		verbose = verbose != true
 		fmt.Println("verbose =", verbose)
+	} else if src == "x" || src == "exit" {
+		return Exit{}, nil
+	} else if src == "l" || src == "ls" || src == "list" {
+		return List{}, nil
 	} else {
 		split := strings.Fields(src)
 		if len(split) > 0 && split[0] == "cut" {
 			return parseCut(split[1:])
 		}
-		err := "error: unknown expression `%s`"
+		err := "unknown expression `%s`"
 		return nil, fmt.Errorf("error: "+err, src)
 	}
 	return nil, nil
