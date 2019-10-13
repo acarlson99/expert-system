@@ -179,28 +179,27 @@ func toRPN(src string, rule string, hs string) (string, error) {
 		'+': 4,
 		'!': 8,
 	}
-	inpar := false
-	ustack := []rune{}
 	stack := []rune{}
 	queue := []rune{}
 	for _, c := range rule {
+		rightassoc := c == '!'
 		if c >= 'A' && c <= 'Z' {
 			queue = append(queue, c)
-		} else if c == '!' {
-			ustack = append(ustack, c)
-		} else if c == '+' || c == '|' || c == '^' {
-			if len(ustack) > 0 && !inpar {
-				queue = append(queue, ustack[len(ustack)-1])
-				ustack = ustack[:len(ustack)-1]
-			}
-			for len(stack)-1 > 0 && prec[stack[len(stack)-1]] > prec[c] {
-				queue = append(queue, stack[len(stack)-1])
-				stack = stack[:len(stack)-1]
+		} else if c == '!' || c == '+' || c == '|' || c == '^' {
+			if len(stack)-1 > 0 {
+				pt := prec[stack[len(stack)-1]]
+				pc := prec[c]
+				for pc < pt || (pc == pt && !rightassoc) {
+					queue = append(queue, stack[len(stack)-1])
+					stack = stack[:len(stack)-1]
+					if len(stack)-1 <= 0 {
+						break
+					}
+				}
 			}
 			stack = append(stack, c)
 		} else if c == '(' {
 			stack = append(stack, c)
-			inpar = true
 		} else if c == ')' {
 			for len(stack)-1 > 0 && stack[len(stack)-1] != '(' {
 				queue = append(queue, stack[len(stack)-1])
@@ -212,20 +211,11 @@ func toRPN(src string, rule string, hs string) (string, error) {
 			}
 			if stack[len(stack)-1] == '(' {
 				stack = stack[:len(stack)-1]
-				inpar = false
 			} else {
 				err := "error: mismatched parentheses in %s handside `%s` of rule `%s`"
 				return string(queue), fmt.Errorf(err, hs, rule, src)
 			}
-			for len(ustack) > 0 && !inpar {
-				queue = append(queue, ustack[len(ustack)-1])
-				ustack = ustack[:len(ustack)-1]
-			}
 		} //TODO: add error here
-	}
-	for len(ustack) > 0 {
-		queue = append(queue, ustack[len(ustack)-1])
-		ustack = ustack[:len(ustack)-1]
 	}
 	for len(stack) > 0 {
 		c := stack[len(stack)-1]
