@@ -61,6 +61,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	graph := prog.ToGraphviz()
+	fmt.Println(graph)
 }
 
 func ParseFile(file *os.File, prog *Facts, setPrompt bool) error {

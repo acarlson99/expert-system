@@ -32,19 +32,21 @@ go run github.com/acarlson99/expert-system
 
 ### Operators
 
-| Operator    | Example   |
-| -           | -         |
-| Paren       | `(A + B)` |
-| Not         | `!A`      |
-| And         | `A + B`   |
-| Or          | `A \ B`   |
-| Xor         | `A ^ B`   |
-| Implication | `A => B`  |
+| Operator    | Example                 |
+| -           | -                       |
+| Paren       | `(A + B)`               |
+| Not         | `!A`                    |
+| And         | `A + B`                 |
+| Or          | <code>A &#124; B</code> |
+| Xor         | `A ^ B`                 |
+| Implication | `A => B`                |
 
 ### Commands
 
 | Command | Description              |
 | :-:     | -                        |
+| `=AB`   | Set A and B              |
+| `?AB`   | Query A and B            |
 | `exit`  | Exit program             |
 | `list`  | List variables and rules |
 | `help`  | Display help             |

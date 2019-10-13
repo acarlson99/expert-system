@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/awalterschulze/gographviz"
+)
 
 type Fact struct {
 	truth       bool
@@ -90,4 +94,26 @@ func (f *Facts) AddRule(c byte, t TreeNode) {
 
 func (f *Facts) Get(c byte) *Fact {
 	return &f.f[c-'A']
+}
+
+func (f *Facts) ToGraphviz() *gographviz.Graph {
+	graphAst, _ := gographviz.ParseString(`digraph G {}`)
+	graph := gographviz.NewGraph()
+	if err := gographviz.Analyse(graphAst, graph); err != nil {
+		panic(err)
+	}
+	f.SoftReset()
+	for ii, fact := range f.f {
+		if fact.rule != nil {
+			name := string(ii + 'A')
+			value, nname := fact.rule.AddToGraph(graph)
+			m := make(map[string]string)
+			if value {
+				m["color"] = "lightgreen"
+			}
+			graph.AddNode("G", name, m)
+			graph.AddEdge(name, nname, true, nil)
+		}
+	}
+	return graph
 }
