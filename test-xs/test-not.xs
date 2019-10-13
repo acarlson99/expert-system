@@ -3,7 +3,7 @@ B + !C => A
 
 # Facts and Queries
 =
-?A  # A = true
+?A  # A = false
 
 =B
 ?A  # A = true

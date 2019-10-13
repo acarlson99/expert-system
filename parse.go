@@ -24,6 +24,7 @@ func Parse(src string) (interface{}, error) {
 		return parseRule(src, lhs, rhs)
 	} else if src == "v" || src == "verbose" {
 		verbose = verbose != true
+		fmt.Println("verbose =", verbose)
 	} else {
 		split := strings.Fields(src)
 		if len(split) > 0 && split[0] == "cut" {

@@ -1,18 +1,27 @@
 package main
 
-import "fmt"
-
 type Fact struct {
-	// value of Fact.  true/false
-	t bool
-	// whether or not Fact has been set or implicit
-	set bool
-	// rule
-	rule TreeNode
-	// user defined or inferred by system
+	truth       bool
+	visited     bool
 	userdefined bool
-	// visited in traversal
-	visited bool
+	rule        TreeNode
+}
+
+func (fact *Fact) Evaluate() bool {
+	if fact.rule == nil {
+		return fact.truth
+	}
+	return fact.rule.Evaluate()
+}
+
+func (fact *Fact) Query() bool {
+	if fact.truth || fact.visited || fact.rule == nil {
+		return fact.truth
+	}
+	fact.visited = true
+	val := fact.Evaluate()
+	fact.truth = val
+	return fact.truth
 }
 
 type Facts struct {
@@ -26,105 +35,45 @@ func GetFacts() *Facts {
 		return g_facts
 	}
 	f := new(Facts)
-	f.Reset()
+	f.HardReset()
 	g_facts = f
 	return f
 }
 
-func (f *Facts) Reset() {
+func (f *Facts) HardReset() {
 	for ii := range f.f {
-		f.f[ii] = Fact{false, false, nil, false, false}
+		f.f[ii] = Fact{false, false, false, nil}
 	}
 }
 
 func (f *Facts) SoftReset() {
 	for ii := range f.f {
 		if !f.f[ii].userdefined {
-			f.f[ii] = Fact{false, false, f.f[ii].rule, false, false}
+			f.f[ii] = Fact{false, false, false, f.f[ii].rule}
 		}
 	}
 }
 
-func (f *Facts) UserSet(cs []byte) error {
+func (f *Facts) UserSet(cs []byte) {
 	for ii := range f.f {
-		f.f[ii] = Fact{false, false, f.f[ii].rule, false, false}
+		f.f[ii] = Fact{false, false, false, f.f[ii].rule}
 	}
-	for ii := range cs {
-		if !f.InRange(cs[ii]) {
-			return fmt.Errorf("Variable '%c' not available", cs[ii])
-		}
-		f.f[cs[ii]-'A'] = Fact{true, true, f.f[cs[ii]-'A'].rule, true, false}
-	}
-	return nil
-}
-
-func (f *Facts) InRange(c byte) bool {
-	idx := c - 'A'
-	return (idx >= 0 && idx < 26)
-}
-
-func (f *Facts) Query(c byte) (bool, error) {
-	if !f.InRange(c) {
-		return false, fmt.Errorf("Variable '%c' not available", c)
-	}
-	fact := &f.f[c-'A']
-	if a, _ := f.IsSet(c); a || fact.visited {
-		return fact.t, nil
-	}
-	fact.visited = true
-	if fact.rule != nil {
-		err := f.Evaluate(c)
-		if err != nil {
-			return false, err
-		}
-		return fact.t, nil
-	} else {
-		return fact.t, nil
+	for _, c := range cs {
+		f.f[c-'A'] = Fact{true, true, true, f.f[c-'A'].rule}
 	}
 }
 
-func (f *Facts) UserQuery(cs []byte) ([]bool, error) {
-	f.SoftReset()
+func (f *Facts) UserQuery(cs []byte) []bool {
 	res := []bool{}
-	for ii := range cs {
-		if !f.InRange(cs[ii]) {
-			return res, fmt.Errorf("Variable '%c' not available", cs[ii])
-		}
-		if err := f.Evaluate(cs[ii]); err != nil {
-			return res, err
-		}
-		q, _ := f.Query(cs[ii])
-		res = append(res, q)
+	for _, c := range cs {
+		val := f.f[c-'A'].Query()
+		res = append(res, val)
 	}
-	return res, nil
+	return res
 }
 
-func (f *Facts) IsSet(c byte) (bool, error) {
-	if !f.InRange(c) {
-		return false, fmt.Errorf("Variable '%c' not available", c)
-	}
-	return f.f[c-'A'].set, nil
-}
-
-func (f *Facts) Set(c byte, t bool) error {
-	if !f.InRange(c) {
-		return fmt.Errorf("Variable '%c' not available", c)
-	}
-	fact := &f.f[c-'A']
-	if fact.set {
-		return fmt.Errorf("Variable '%c' already set", c)
-	}
-	fact.t = t
-	fact.set = true
-	return nil
-}
-
-func (f *Facts) AddRule(c byte, t TreeNode) error {
-	if !f.InRange(c) {
-		return fmt.Errorf("Variable '%c' not available", c)
-	} else if t == nil {
-		return fmt.Errorf("Assigning nil rule to variable '%c'", c)
-	}
+func (f *Facts) AddRule(c byte, t TreeNode) {
+	f.SoftReset()
 	fact := &f.f[c-'A']
 	if fact.rule == nil {
 		fact.rule = t
@@ -132,27 +81,8 @@ func (f *Facts) AddRule(c byte, t TreeNode) error {
 		constructed := &BinaryGate{GateOr, t, fact.rule}
 		fact.rule = constructed
 	}
-	return nil
 }
 
-func (f *Facts) Evaluate(c byte) error {
-	if !f.InRange(c) {
-		return fmt.Errorf("Variable '%c' not available", c)
-	}
-	fact := &f.f[c-'A']
-	if fact.rule == nil || fact.visited {
-		return nil
-	}
-	fact.visited = true
-	if fact.userdefined {
-		return nil
-	}
-	value := fact.rule.Evaluate()
-	if !fact.set && value {
-		return f.Set(c, value)
-	}
-	if fact.set && fact.t != value {
-		return fmt.Errorf("Variable '%c' set to different values", c)
-	}
-	return nil
+func (f *Facts) Get(c byte) *Fact {
+	return &f.f[c-'A']
 }
