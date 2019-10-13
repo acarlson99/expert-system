@@ -82,7 +82,6 @@ func assign(src string) (Assign, error) {
 		return out, nil
 	}
 	for _, c := range src[1:] {
-		fmt.Println(c)
 		if c >= 'A' && c <= 'Z' {
 			out = append(out, byte(c))
 		} else {
@@ -101,7 +100,6 @@ func query(src string) (Query, error) {
 		return out, nil
 	}
 	for _, c := range src[1:] {
-		fmt.Println(c)
 		if c >= 'A' && c <= 'Z' {
 			out = append(out, byte(c))
 		} else {

@@ -90,7 +90,13 @@ func eval(prog *Facts, src string) {
 				fmt.Println(err)
 				return
 			}
-			fmt.Println(ret)
+			for ii, truth := range ret {
+				if ii != 0 {
+					fmt.Printf(", ")
+				}
+				fmt.Printf("%v", truth)
+			}
+			fmt.Println()
 		}
 	case []Rule:
 		for _, r := range t {
