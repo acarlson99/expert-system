@@ -56,6 +56,8 @@ func (f *Facts) SoftReset() {
 	for ii := range f.f {
 		if !f.f[ii].userdefined {
 			f.f[ii] = Fact{false, false, false, f.f[ii].rule}
+		} else {
+			f.f[ii].visited = false
 		}
 	}
 }
@@ -65,7 +67,7 @@ func (f *Facts) UserSet(cs []byte) {
 		f.f[ii] = Fact{false, false, false, f.f[ii].rule}
 	}
 	for _, c := range cs {
-		f.f[c-'A'] = Fact{true, true, true, f.f[c-'A'].rule}
+		f.f[c-'A'] = Fact{true, false, true, f.f[c-'A'].rule}
 	}
 }
 
@@ -103,16 +105,23 @@ func (f *Facts) ToGraphviz() *gographviz.Graph {
 		panic(err)
 	}
 	f.SoftReset()
-	for ii, fact := range f.f {
-		if fact.rule != nil {
+	for ii, _ := range f.f {
+		fact := &f.f[ii]
+		if fact.rule != nil && !fact.visited {
 			name := string(ii + 'A')
 			value, nname := fact.rule.AddToGraph(graph)
 			m := make(map[string]string)
-			if value {
+			if fact.userdefined {
+				m["color"] = "blue"
+			} else if value {
 				m["color"] = "lightgreen"
+			}
+			if !fact.userdefined {
+				fact.truth = value
 			}
 			graph.AddNode("G", name, m)
 			graph.AddEdge(name, nname, true, nil)
+			fact.visited = true
 		}
 	}
 	return graph
