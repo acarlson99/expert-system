@@ -1,0 +1,23 @@
+# dot -Tpng rules.dot -o rules.png
+
+digraph G {
+	Not_0xc0000980c0->J;
+	And_0xc00008a270->I;
+	And_0xc00008a270->Not_0xc0000980c0;
+	D->And_0xc00008a270;
+	A->D;
+	B->D;
+	And_0xc0001b4060->A;
+	And_0xc0001b4060->B;
+	C->And_0xc0001b4060;
+	A [ color=green ];
+	And_0xc00008a270 [ color=green, label=And ];
+	And_0xc0001b4060 [ color=green, label=And ];
+	B [ color=green ];
+	C [ color=green ];
+	D [ color=green ];
+	I [ color=blue ];
+	J;
+	Not_0xc0000980c0 [ color=green, label=Not ];
+
+}
