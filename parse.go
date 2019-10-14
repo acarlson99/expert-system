@@ -7,6 +7,7 @@ import (
 
 type Exit struct{}
 type List struct{}
+type Vis struct{}
 type Help struct{} // TODO: implement
 
 func Parse(src string) (interface{}, error) {
@@ -33,6 +34,8 @@ func Parse(src string) (interface{}, error) {
 		return Exit{}, nil
 	} else if src == "l" || src == "ls" || src == "list" {
 		return List{}, nil
+	} else if src == "vis" {
+		return Vis{}, nil
 	} else {
 		split := strings.Fields(src)
 		if len(split) > 0 && split[0] == "cut" {

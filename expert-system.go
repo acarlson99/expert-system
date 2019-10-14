@@ -61,8 +61,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	graph := prog.ToGraphviz()
-	fmt.Println(graph)
 }
 
 func ParseFile(file *os.File, prog *Facts, setPrompt bool) error {
@@ -124,6 +122,13 @@ func eval(prog *Facts, src string) {
 	case Help:
 		fmt.Printf("TODO: print funs")
 	// TODO: handle cut
+	case Vis:
+		graph := prog.ToGraphviz()
+		ast, err := graph.WriteAst()
+		if err != nil {
+			fmt.Println("Error creating graphviz AST:", err)
+		}
+		fmt.Println(ast)
 	default:
 		fmt.Printf("i-error: unknown parse return (%T,%+v)\n", ret, ret)
 		return

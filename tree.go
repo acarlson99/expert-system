@@ -11,6 +11,7 @@ type TreeNode interface {
 	String() string
 	// return name of node created
 	AddToGraph(graph *gographviz.Graph) (bool, string)
+	Name() string
 }
 
 // value literal.  'A', 'B' evaluate to their boolean values
@@ -21,6 +22,7 @@ type Value struct {
 func (v *Value) Evaluate() bool {
 	facts := GetFacts()
 
+	fmt.Println("EVALUATING", v)
 	value := facts.Get(v.ch).Query()
 	if verbose {
 		fmt.Printf("%c = %v\n", v.ch, value)
@@ -34,12 +36,38 @@ func (v *Value) String() string {
 
 func (v *Value) AddToGraph(graph *gographviz.Graph) (bool, string) {
 	m := make(map[string]string)
-	value := v.Evaluate()
+	name := v.Name()
+	facts := GetFacts()
+	fact := facts.Get(v.ch)
+
+	var value bool
+	var nname string
+	if fact.visited {
+		return fact.truth, name
+	}
+	fact.visited = true
+	if fact.rule != nil {
+		// fmt.Printf("EVALUATING SOMETHING %s\n", fact.rule.String())
+		value, nname = fact.rule.AddToGraph(graph)
+	} else {
+		value = fact.truth
+		nname = ""
+	}
+
 	if value {
 		m["color"] = "lightgreen"
 	}
-	graph.AddNode("G", string(v.ch), m)
-	return value, string(v.ch)
+	// fmt.Println("WALKING THROUGH", v.ch)
+	graph.AddNode("G", name, m)
+	if nname != "" {
+		// fmt.Println("ADDING EDGE", name, nname)
+		graph.AddEdge(name, nname, true, nil)
+	}
+	return value, name
+}
+
+func (v *Value) Name() string {
+	return string(v.ch)
 }
 
 // Gate type enum
@@ -128,7 +156,7 @@ func (g *UnaryGate) AddToGraph(graph *gographviz.Graph) (bool, string) {
 		panic("Invalid unary gate type: " + string(g.gType))
 	}
 
-	name := g.gType.Word() + fmt.Sprintf("_%p", g)
+	name := g.Name()
 	m := make(map[string]string)
 	if value {
 		m["color"] = "lightgreen"
@@ -140,6 +168,10 @@ func (g *UnaryGate) AddToGraph(graph *gographviz.Graph) (bool, string) {
 		fmt.Printf("%s%v = %v\n", g.gType, g.next, value)
 	}
 	return value, name
+}
+
+func (g *UnaryGate) Name() string {
+	return g.gType.Word() + fmt.Sprintf("_%p", g)
 }
 
 // Binary gate
@@ -205,7 +237,7 @@ func (g *BinaryGate) AddToGraph(graph *gographviz.Graph) (bool, string) {
 		m["color"] = "lightgreen"
 	}
 
-	name := g.gType.Word() + fmt.Sprintf("_%p", g)
+	name := g.Name()
 	graph.AddNode("G", name, m)
 	graph.AddEdge(name, lname, true, nil)
 	graph.AddEdge(name, rname, true, nil)
@@ -214,4 +246,8 @@ func (g *BinaryGate) AddToGraph(graph *gographviz.Graph) (bool, string) {
 		fmt.Printf("%v %s %v = %v\n", left, g.gType, right, value)
 	}
 	return value, name
+}
+
+func (g *BinaryGate) Name() string {
+	return g.gType.Word() + fmt.Sprintf("_%p", g)
 }
