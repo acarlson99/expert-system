@@ -1,0 +1,23 @@
+# dot -Tpng file.dot -o expert-system.png
+
+digraph G {
+	Not_0xc00000e160->J;
+	And_0xc000192150->I;
+	And_0xc000192150->Not_0xc00000e160;
+	D->And_0xc000192150;
+	A->D;
+	B->D;
+	And_0xc000192090->A;
+	And_0xc000192090->B;
+	C->And_0xc000192090;
+	A [ color=green ];
+	And_0xc000192090 [ color=green, label=And ];
+	And_0xc000192150 [ color=green, label=And ];
+	B [ color=green ];
+	C [ color=green ];
+	D [ color=green ];
+	I [ color=blue ];
+	J;
+	Not_0xc00000e160 [ color=green, label=Not ];
+
+}

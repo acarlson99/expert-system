@@ -114,7 +114,7 @@ func (f *Facts) ToGraphviz() *gographviz.Graph {
 			if fact.userdefined {
 				m["color"] = "blue"
 			} else if value {
-				m["color"] = "lightgreen"
+				m["color"] = "green"
 			}
 			if !fact.userdefined {
 				fact.truth = value

@@ -58,7 +58,7 @@ func (v *Value) AddToGraph(graph *gographviz.Graph) (bool, string) {
 	if fact.userdefined {
 		m["color"] = "blue"
 	} else if fact.truth {
-		m["color"] = "lightgreen"
+		m["color"] = "green"
 	}
 	graph.AddNode("G", name, m)
 	if nname != "" {
@@ -160,8 +160,9 @@ func (g *UnaryGate) AddToGraph(graph *gographviz.Graph) (bool, string) {
 	name := g.Name()
 	m := make(map[string]string)
 	if value {
-		m["color"] = "lightgreen"
+		m["color"] = "green"
 	}
+	m["label"] = g.gType.Word()
 	graph.AddNode("G", name, m)
 	graph.AddEdge(name, nname, true, nil)
 
@@ -235,8 +236,9 @@ func (g *BinaryGate) AddToGraph(graph *gographviz.Graph) (bool, string) {
 
 	m := make(map[string]string)
 	if value {
-		m["color"] = "lightgreen"
+		m["color"] = "green"
 	}
+	m["label"] = g.gType.Word()
 
 	name := g.Name()
 	graph.AddNode("G", name, m)

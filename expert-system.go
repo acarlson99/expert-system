@@ -139,6 +139,16 @@ func eval(prog *Facts, src string) {
 			fmt.Println("Error creating graphviz AST:", err)
 		}
 		fmt.Println(ast)
+		filename := "file.dot"
+		file, err := os.Create(filename)
+		if err != nil {
+			fmt.Printf("Error opening %s: %v\n", filename, err)
+			return
+		}
+		defer file.Close()
+		fmt.Printf("Dot form written to %s. Run `dot -Tpng %s -o expert-system.png` to generate png\n", filename, filename)
+		file.Write([]byte(fmt.Sprintf("# dot -Tpng %s -o expert-system.png\n\n", filename)))
+		file.Write([]byte(fmt.Sprintf("%v", ast)))
 	default:
 		fmt.Printf("i-error: unknown parse return (%T,%+v)\n", ret, ret)
 		return
