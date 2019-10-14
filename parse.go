@@ -12,6 +12,9 @@ type Help struct{} // TODO: implement
 func Parse(src string) (interface{}, error) {
 	if len(src) == 0 {
 		return nil, nil
+	} else if len(src) >= 2 && src[:2] == "?=" {
+		in := strings.Join(strings.Fields(src[2:]), "")
+		return parseOSQuery(in)
 	} else if src[0] == '=' || src[0] == '?' {
 		in := strings.Join(strings.Fields(src), "")
 		return parseUnop(in)
@@ -33,6 +36,8 @@ func Parse(src string) (interface{}, error) {
 		return Exit{}, nil
 	} else if src == "l" || src == "ls" || src == "list" {
 		return List{}, nil
+	} else if src == "h" || src == "help" {
+		return Help{}, nil
 	} else {
 		split := strings.Fields(src)
 		if len(split) > 0 && split[0] == "cut" {
@@ -119,6 +124,28 @@ func query(src string) (Query, error) {
 }
 
 // @rule
+
+func parseOSQuery(src string) (Rule, error) {
+	out := Rule{}
+	if err := checkHs(src, src, "()!+|^", "right"); err != nil {
+		return out, err
+	}
+	src1, err1 := toRPN(src)
+	if err1 != nil {
+		return out, err1
+	}
+	src2 := cleanNot(src1)
+	src3 := simplifyHs(src2)
+	out1, err2 := makeRule(src3, "A")
+	if err2 != nil {
+		return out, err2
+	}
+	if len(out1) != 1 {
+		err := "invalid anonymous query `%s`"
+		return out, fmt.Errorf("error: "+err, src)
+	}
+	return out1[0], nil
+}
 
 type Rule struct {
 	id   rune

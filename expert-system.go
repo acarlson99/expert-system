@@ -107,6 +107,10 @@ func eval(prog *Facts, src string) {
 			}
 			fmt.Println()
 		}
+	case Rule:
+		// ONESHOT
+		fmt.Println(t.id)
+		fmt.Println(t.node)
 	case []Rule:
 		for _, r := range t {
 			prog.AddRule(byte(r.id), r.node)
