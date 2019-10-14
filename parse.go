@@ -125,8 +125,13 @@ func query(src string) (Query, error) {
 
 // @rule
 
-func parseOSQuery(src string) (Rule, error) {
-	out := Rule{}
+type OSRule Rule
+
+func parseOSQuery(src string) (OSRule, error) {
+	out := OSRule{}
+	if src == "" {
+		return out, fmt.Errorf("error: empty rule")
+	}
 	if err := checkHs(src, src, "()!+|^", "right"); err != nil {
 		return out, err
 	}
@@ -144,7 +149,7 @@ func parseOSQuery(src string) (Rule, error) {
 		err := "invalid anonymous query `%s`"
 		return out, fmt.Errorf("error: "+err, src)
 	}
-	return out1[0], nil
+	return OSRule(out1[0]), nil
 }
 
 type Rule struct {

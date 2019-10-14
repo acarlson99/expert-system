@@ -107,10 +107,16 @@ func eval(prog *Facts, src string) {
 			}
 			fmt.Println()
 		}
-	case Rule:
-		// ONESHOT
-		fmt.Println(t.id)
-		fmt.Println(t.node)
+	case OSRule:
+		t.id = '['
+		prog.AddRule(byte(t.id), t.node)
+		ret := prog.UserQuery([]byte{byte(t.id)})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("%t\n", ret[0])
+		prog.f[int('['-'A')].rule = nil
 	case []Rule:
 		for _, r := range t {
 			prog.AddRule(byte(r.id), r.node)
@@ -122,8 +128,8 @@ func eval(prog *Facts, src string) {
 			str := ""
 			if f.rule != nil {
 				str = fmt.Sprintf("; %s => %c", f.rule.String(), i+'A')
+				fmt.Printf("[%c]: %t%s\n", i+'A', f.truth, str)
 			}
-			fmt.Printf("[%c]: %t%s\n", i+'A', f.truth, str)
 		}
 	case Help:
 		fmt.Printf("TODO: print funs")
