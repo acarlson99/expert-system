@@ -31,7 +31,7 @@ func (fact *Fact) Query() bool {
 }
 
 type Facts struct {
-	f [26]Fact
+	f [27]Fact
 }
 
 var g_facts *Facts

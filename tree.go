@@ -22,7 +22,6 @@ type Value struct {
 func (v *Value) Evaluate() bool {
 	facts := GetFacts()
 
-	fmt.Println("EVALUATING", v)
 	value := facts.Get(v.ch).Query()
 	if verbose {
 		fmt.Printf("%c = %v\n", v.ch, value)
