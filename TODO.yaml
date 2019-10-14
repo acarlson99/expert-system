@@ -1,11 +1,11 @@
 TODO:
   - Add ability to remove rules
   - Reset rules, etc.
-  - Handle evaluation of things like 'A + B | C' without binding to variable
   - Add help to interactive mode
   - Make vis command take arg for output file
 
 DONE:
+  - Handle evaluation of things like 'A + B | C' without binding to variable
   - Multiple evaluation:
       A => B
       ?B
