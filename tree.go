@@ -36,32 +36,12 @@ func (v *Value) String() string {
 func (v *Value) AddToGraph(graph *gographviz.Graph) (bool, string) {
 	m := make(map[string]string)
 	name := v.Name()
-	facts := GetFacts()
-	fact := facts.Get(v.ch)
-
-	var value bool
-	var nname string
-	if fact.visited {
-		return fact.truth, name
-	}
-	fact.visited = true
-	if fact.rule != nil {
-		// fmt.Printf("EVALUATING SOMETHING %s\n", fact.rule.String())
-		value, nname = fact.rule.AddToGraph(graph)
-	} else {
-		value = fact.truth
-		nname = ""
-	}
+	value := v.Evaluate()
 
 	if value {
 		m["color"] = "lightgreen"
 	}
-	// fmt.Println("WALKING THROUGH", v.ch)
 	graph.AddNode("G", name, m)
-	if nname != "" {
-		// fmt.Println("ADDING EDGE", name, nname)
-		graph.AddEdge(name, nname, true, nil)
-	}
 	return value, name
 }
 
