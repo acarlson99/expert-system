@@ -144,7 +144,6 @@ list         List variables and rules
 exit         Exit program
 help         Display help
 `)
-	// TODO: handle cut
 	case Vis:
 		graph := prog.ToGraphviz()
 		ast, err := graph.WriteAst()
