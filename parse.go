@@ -12,11 +12,6 @@ type Vis struct {
 }
 type Help struct{}
 
-// FIXME:
-// ABCDFEASFAFADSASFSADSADASFASFSAFADFAFASFSFDAFASFDSASFFSAADFDASADASFSAFDFDAAF|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||=>L
-// ABCDEF=>K results in F=>K
-// ?=A|B returns only 'B'
-
 func Parse(src string) (interface{}, error) {
 	if len(src) == 0 {
 		return nil, nil
@@ -159,8 +154,7 @@ func parseOSQuery(src string) (OSRule, error) {
 		return out, err1
 	}
 	src2 := cleanNot(src1)
-	src3 := simplifyHs(src2)
-	out1, err2 := makeRule(src3, "A")
+	out1, err2 := makeRule(src2, "A")
 	if err2 != nil {
 		return out, err2
 	}
@@ -192,6 +186,12 @@ func parseRule(src string, lhs string, rhs string) ([]Rule, error) {
 	if err2 != nil {
 		return out, err2
 	}
+	if err := checkRPN(rhs1); err != nil {
+		return out, err
+	}
+	if err := checkRPN(lhs1); err != nil {
+		return out, err
+	}
 	rhs1 = cleanNot(rhs1)
 	lhs1 = cleanNot(lhs1)
 	rhs2 := simplifyHs(rhs1)
@@ -204,6 +204,30 @@ func parseRule(src string, lhs string, rhs string) ([]Rule, error) {
 		return out1, err3
 	}
 	return out1, nil
+}
+
+func checkRPN(src string) error {
+	cnt := 0
+	below := false
+	for _, c := range src {
+		if (c >= 'A' && c <= 'Z') || c == '#' {
+			cnt += 1
+		} else if inSet(c, "!+|^") {
+			cnt -= 2
+		} else {
+			err := "unknown literal `%c` in `%s`"
+			return fmt.Errorf("error: "+err, c, src)
+		}
+		if cnt < 0 {
+			below = true
+		}
+	}
+	if cnt == 1 && !below {
+		return nil
+	} else {
+		err := "unknown postfix expression `%s`"
+		return fmt.Errorf("error: "+err, src)
+	}
 }
 
 func cleanNot(src string) string {
