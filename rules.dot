@@ -1,5 +1,0 @@
-# dot -Tpng rules.dot -o rules.png
-
-digraph G {
-
-}
