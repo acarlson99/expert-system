@@ -1,9 +1,14 @@
 # Expert System
 
+An [expert system](https://en.wikipedia.org/wiki/Expert_system) is a machine designed to solve for unknown variables given facts and rules
+
+Implemented using [backward chaining](https://en.wikipedia.org/wiki/Backward_chaining) and lots of trees
+
 ## Dependencies
 
 * go version 1.13
 * github.com/chzyer/readline
+* github.com/awalterschulze/gographviz
 
 ## Build
 
@@ -52,3 +57,5 @@ go run github.com/acarlson99/expert-system
 | `list`                      | List variables and rules |
 | `exit`                      | Exit program             |
 | `help`                      | Display help             |
+
+![thing](./resources/rules.png)
