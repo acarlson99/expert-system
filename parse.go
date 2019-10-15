@@ -60,12 +60,12 @@ func parseReset(args []string) (Reset, error) {
 	out := Reset{}
 	if len(args) == 1 {
 		for c := 'A'; c <= 'Z'; c += 1 {
-			out.args = append(out.args, c)
+			out.args = append(out.args, byte(c))
 		}
 	} else {
 		for _, s := range args[1:] {
 			if len(s) == 1 {
-				c := byte(s)
+				c := byte(s[0])
 				if c >= 'A' && c <= 'Z' {
 					out.args = append(out.args, c)
 				} else {

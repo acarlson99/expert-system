@@ -123,7 +123,12 @@ func eval(prog *Facts, src string) {
 		}
 	case Help:
 		fmt.Printf("TODO: print funs")
-	// TODO: handle cut
+	case Reset:
+		for _, c := range t.args {
+			if c >= 'A' && c <= 'Z' {
+				prog.f[int(byte(c))-int('A')].rule = nil
+			}
+		}
 	case Vis:
 		graph := prog.ToGraphviz()
 		ast, err := graph.WriteAst()
