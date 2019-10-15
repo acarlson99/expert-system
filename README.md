@@ -1,8 +1,6 @@
 # Expert System
 
-An [expert system](https://en.wikipedia.org/wiki/Expert_system) is a machine designed to solve for unknown variables given facts and rules
-
-Implemented using [backward chaining](https://en.wikipedia.org/wiki/Backward_chaining) and lots of trees
+A [backward chaining](https://en.wikipedia.org/wiki/Backward_chaining) [expert system](https://en.wikipedia.org/wiki/Expert_system) with rule visualizer
 
 ## Dependencies
 
