@@ -1,8 +1,8 @@
 TODO:
-  - Add help to interactive mode
-  - Make vis command take arg for output file
+  - Use args in vis evaluator
 
 DONE:
+  - Add help to interactive mode
   - Add ability to remove rules
   - Reset rules, etc.
   - Handle evaluation of things like 'A + B | C' without binding to variable

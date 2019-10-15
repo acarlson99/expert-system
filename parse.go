@@ -7,7 +7,9 @@ import (
 
 type Exit struct{}
 type List struct{}
-type Vis struct{}
+type Vis struct {
+	args []string
+}
 type Help struct{} // TODO: implement
 
 func Parse(src string) (interface{}, error) {
@@ -37,8 +39,12 @@ func Parse(src string) (interface{}, error) {
 		return Exit{}, nil
 	} else if src == "l" || src == "ls" || src == "list" {
 		return List{}, nil
-	} else if src == "vis" {
-		return Vis{}, nil
+	} else if len(src) >= len("vis") && src[:3] == "vis" {
+		in := strings.Fields(src)
+		if len(in) > 1 {
+			return Vis{args: in[1:]}, nil
+		}
+		return Vis{args: nil}, nil
 	} else if src == "h" || src == "help" {
 		return Help{}, nil
 	} else {

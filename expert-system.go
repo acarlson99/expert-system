@@ -116,13 +116,26 @@ func eval(prog *Facts, src string) {
 	case List:
 		for i, f := range prog.f {
 			str := ""
-			if f.rule != nil {
-				str = fmt.Sprintf("; %s => %c", f.rule.String(), i+'A')
+			if f.rule != nil || f.truth {
+				if f.rule != nil {
+					num := 1
+					if f.truth {
+						num = 2
+					}
+					str = fmt.Sprintf(";%*c%v => %c", num, ' ', f.rule, i+'A')
+				}
 				fmt.Printf("[%c]: %t%s\n", i+'A', f.truth, str)
 			}
 		}
 	case Help:
-		fmt.Printf("TODO: print funs")
+		fmt.Printf(`=AB          Set A and B
+?AB          Query A and B
+?=(A | B)    Query expression
+reset A B    Reset variable rules
+list         List variables and rules
+exit         Exit program
+help         Display help
+`)
 	case Reset:
 		for _, c := range t.args {
 			if c >= 'A' && c <= 'Z' {
@@ -130,6 +143,10 @@ func eval(prog *Facts, src string) {
 			}
 		}
 	case Vis:
+		fmt.Println("TODO: use args!!!")
+		for _, s := range t.args {
+			fmt.Println(s)
+		}
 		graph := prog.ToGraphviz()
 		ast, err := graph.WriteAst()
 		if err != nil {

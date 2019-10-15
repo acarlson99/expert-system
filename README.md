@@ -43,10 +43,12 @@ go run github.com/acarlson99/expert-system
 
 ### Commands
 
-| Command | Description              |
-| :-:     | -                        |
-| `=AB`   | Set A and B              |
-| `?AB`   | Query A and B            |
-| `exit`  | Exit program             |
-| `list`  | List variables and rules |
-| `help`  | Display help             |
+| Command                     | Description              |
+| -                           | -                        |
+| `=AB`                       | Set A and B              |
+| `?AB`                       | Query A and B            |
+| <code>?=(A &#124; B)</code> | Query expression         |
+| `reset A B`                 | Reset variable rules     |
+| `list`                      | List variables and rules |
+| `exit`                      | Exit program             |
+| `help`                      | Display help             |
