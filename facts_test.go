@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -51,13 +50,22 @@ func TestLongDefinitions(t *testing.T) {
 	f.AddRule('A', &Value{'B'})
 	f.AddRule('B', &Value{'C'})
 	f.AddRule('C', &Value{'D'})
-	verbose = true
-	fmt.Println("START")
-	fmt.Println(f.UserQuery([]byte{'A'}))
-	fmt.Println("END")
+	// verbose = true
+	// fmt.Println("START")
+	res := f.UserQuery([]byte{'A'})
+	if res[0] != false || len(res) != 1 {
+		panic("SHOULD BE FALSE")
+	}
+	// fmt.Println("END")
 	f.UserSet([]byte{'D'})
-	fmt.Println(f.UserQuery([]byte{'A'}))
-	fmt.Println("A")
-	fmt.Println(f.UserQuery([]byte{'D'}))
-	verbose = false
+	res = f.UserQuery([]byte{'A'})
+	if res[0] != true || len(res) != 1 {
+		panic("SHOULD BE TRUE")
+	}
+	// fmt.Println("A")
+	res = f.UserQuery([]byte{'D'})
+	if res[0] != true || len(res) != 1 {
+		panic("SHOULD BE TRUE")
+	}
+	// verbose = false
 }

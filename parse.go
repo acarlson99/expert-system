@@ -12,6 +12,11 @@ type Vis struct {
 }
 type Help struct{}
 
+// FIXME:
+// ABCDFEASFAFADSASFSADSADASFASFSAFADFAFASFSFDAFASFDSASFFSAADFDASADASFSAFDFDAAF|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||=>L
+// ABCDEF=>K results in F=>K
+// ?=A|B returns only 'B'
+
 func Parse(src string) (interface{}, error) {
 	if len(src) == 0 {
 		return nil, nil
