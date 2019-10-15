@@ -106,15 +106,7 @@ func eval(prog *Facts, src string) {
 			fmt.Println()
 		}
 	case OSRule:
-		t.id = '['
-		prog.AddRule(byte(t.id), t.node)
-		ret := prog.UserQuery([]byte{byte(t.id)})
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Printf("%t\n", ret[0])
-		prog.f[int('['-'A')].rule = nil
+		fmt.Printf("%t\n", t.node.Evaluate())
 	case []Rule:
 		for _, r := range t {
 			prog.AddRule(byte(r.id), r.node)

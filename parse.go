@@ -43,8 +43,8 @@ func Parse(src string) (interface{}, error) {
 		return Help{}, nil
 	} else {
 		split := strings.Fields(src)
-		if len(split) > 0 && split[0] == "cut" {
-			return parseCut(split[1:])
+		if len(split) > 0 && (split[0] == "reset" || split[0] == "r") {
+			return parseReset(split)
 		}
 		err := "unknown expression `%s`"
 		return nil, fmt.Errorf("error: "+err, src)
@@ -52,25 +52,30 @@ func Parse(src string) (interface{}, error) {
 	return nil, nil
 }
 
-func parseCut(args []string) ([]byte, error) {
-	out := []byte{}
-	if len(args) < 2 {
-		err := "error: invalid argument count for `cut`\n" +
-			"usage: cut <A-Z> <l | r> [l | r ...]"
-		return out, fmt.Errorf(err)
-	} else if len(args[0]) != 1 || !(args[0][0] >= 'A' && args[0][0] <= 'Z') {
-		err := "error: invalid argument `%s` for `cut`" +
-			"usage: cut <A-Z> <l | r> [l | r ...]"
-		return out, fmt.Errorf(err, args[0])
-	}
-	out = append(out, args[0][0])
-	for _, s := range args[1:] {
-		if s == "l" || s == "r" {
-			out = append(out, s[0])
-		} else {
-			err := "error: invalid argument `%s` for `cut`" +
-				"usage: cut <A-Z> <l | r> [l | r ...]"
-			return out, fmt.Errorf(err, s)
+type Reset struct {
+	args []byte
+}
+
+func parseReset(args []string) (Reset, error) {
+	out := Reset{}
+	if len(args) == 1 {
+		for c := 'A'; c <= 'Z'; c += 1 {
+			out.args = append(out.args, c)
+		}
+	} else {
+		for _, s := range args[1:] {
+			if len(s) == 1 {
+				c := byte(s)
+				if c >= 'A' && c <= 'Z' {
+					out.args = append(out.args, c)
+				} else {
+					err := "unknown literal `%s` in reset"
+					return out, fmt.Errorf("error: "+err, s)
+				}
+			} else {
+				err := "unknown literal `%s` in reset"
+				return out, fmt.Errorf("error: "+err, s)
+			}
 		}
 	}
 	return out, nil
