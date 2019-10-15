@@ -143,26 +143,26 @@ help         Display help
 			}
 		}
 	case Vis:
-		fmt.Println("TODO: use args!!!")
-		for _, s := range t.args {
-			fmt.Println(s)
-		}
 		graph := prog.ToGraphviz()
 		ast, err := graph.WriteAst()
 		if err != nil {
 			fmt.Println("Error creating graphviz AST:", err)
 		}
-		fmt.Println(ast)
-		filename := "rules.dot"
-		file, err := os.Create(filename)
-		if err != nil {
-			fmt.Printf("Error opening %s: %v\n", filename, err)
-			return
+		if len(t.args) == 0 {
+			fmt.Printf("%v", ast)
+		} else {
+			for _, filename := range t.args {
+				file, err := os.Create(filename)
+				if err != nil {
+					fmt.Printf("Error opening %s: %v\n", filename, err)
+					return
+				}
+				fmt.Printf("Dot form written to %s. Run `dot -Tpng %s -o rules.png` to generate png\n", filename, filename)
+				file.Write([]byte(fmt.Sprintf("# dot -Tpng %s -o rules.png\n\n", filename)))
+				file.Write([]byte(fmt.Sprintf("%v", ast)))
+				file.Close()
+			}
 		}
-		defer file.Close()
-		fmt.Printf("Dot form written to %s. Run `dot -Tpng %s -o rules.png` to generate png\n", filename, filename)
-		file.Write([]byte(fmt.Sprintf("# dot -Tpng %s -o rules.png\n\n", filename)))
-		file.Write([]byte(fmt.Sprintf("%v", ast)))
 	default:
 		fmt.Printf("i-error: unknown parse return (%T,%+v)\n", ret, ret)
 		return

@@ -10,7 +10,7 @@ type List struct{}
 type Vis struct {
 	args []string
 }
-type Help struct{} // TODO: implement
+type Help struct{}
 
 func Parse(src string) (interface{}, error) {
 	if len(src) == 0 {
