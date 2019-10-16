@@ -153,6 +153,9 @@ func parseOSQuery(src string) (OSRule, error) {
 	if err1 != nil {
 		return out, err1
 	}
+	if err := checkRPN(src1); err != nil {
+		return out, err
+	}
 	src2 := cleanNot(src1)
 	out1, err2 := makeRule(src2, "A")
 	if err2 != nil {
@@ -279,13 +282,23 @@ func toRPN(infix string) (string, error) {
 	out_queue := []byte{}
 	op_stack := []byte{}
 
-	for _, c := range infix {
+	for i, c := range infix {
 		right_assoc := c == '!'
 		if c >= 'A' && c <= 'Z' {
 			out_queue = append(out_queue, byte(c))
 		} else if inSet(rune(c), "^|+!") {
 			if c == '!' {
-				out_queue = append(out_queue, '#')
+				if i < len(infix)-1 {
+					if infix[i+1] == '(' ||
+						(infix[i+1] >= 'A' && infix[i+1] <= 'Z') ||
+						infix[i+1] == '!' {
+						out_queue = append(out_queue, '#')
+					} else {
+						return "", fmt.Errorf("error: stray `!` in `%s`", infix)
+					}
+				} else {
+					return "", fmt.Errorf("error: stray `!` in `%s`", infix)
+				}
 			}
 			p := prec[c]
 			for len(op_stack) > 0 && ((prec[rune(op_stack[len(op_stack)-1])] > p) ||
@@ -296,6 +309,12 @@ func toRPN(infix string) (string, error) {
 			}
 			op_stack = append(op_stack, byte(c))
 		} else if c == '(' {
+			if i < len(infix)-1 {
+				if infix[i+1] == ')' {
+					err := "empty parenthesized expression in `%s`"
+					return "", fmt.Errorf("error: "+err, infix)
+				}
+			}
 			op_stack = append(op_stack, byte(c))
 		} else if c == ')' {
 			for len(op_stack) > 0 && op_stack[len(op_stack)-1] != '(' {
