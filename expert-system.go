@@ -45,7 +45,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		// only eval file or load data into repl
+		// only Eval file or load data into repl
 		if !loadFile {
 			os.Exit(0)
 		}
@@ -73,12 +73,12 @@ func ParseFile(file *os.File, prog *Facts, setPrompt bool) error {
 	rl, err := readline.NewEx(&conf)
 	defer rl.Close()
 	for line, err := rl.Readline(); err == nil; line, err = rl.Readline() {
-		eval(prog, line)
+		Eval(prog, line)
 	}
 	return err
 }
 
-func eval(prog *Facts, src string) {
+func Eval(prog *Facts, src string) {
 	ret, err := Parse(Scan(src))
 	if err != nil {
 		fmt.Println(err)

@@ -221,6 +221,10 @@ func checkRPN(src string) error {
 		if cnt < 0 {
 			below = true
 		}
+		//end
+		if inSet(c, "!+|^") {
+			cnt += 1
+		}
 	}
 	if cnt == 1 && !below {
 		return nil
