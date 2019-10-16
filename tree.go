@@ -45,6 +45,7 @@ func (v *Value) AddToGraph(graph *gographviz.Graph) (bool, string) {
 		return fact.truth, name
 	}
 	if fact.rule != nil && !fact.visited {
+		fact.visited = true
 		value, nname = fact.rule.AddToGraph(graph)
 	} else {
 		value = fact.truth

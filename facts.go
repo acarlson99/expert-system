@@ -109,6 +109,7 @@ func (f *Facts) ToGraphviz() *gographviz.Graph {
 		fact := &f.f[ii]
 		if fact.rule != nil && !fact.visited {
 			name := string(ii + 'A')
+			fact.visited = true
 			value, nname := fact.rule.AddToGraph(graph)
 			m := make(map[string]string)
 			if fact.userdefined {
