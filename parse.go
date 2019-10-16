@@ -35,7 +35,7 @@ func Parse(src string) (interface{}, error) {
 	} else if src == "v" || src == "verbose" {
 		verbose = verbose != true
 		fmt.Println("verbose =", verbose)
-	} else if src == "x" || src == "exit" {
+	} else if src == "q" || src == "quit" {
 		return Exit{}, nil
 	} else if src == "l" || src == "ls" || src == "list" {
 		return List{}, nil
@@ -300,6 +300,19 @@ func toRPN(infix string) (string, error) {
 					return "", fmt.Errorf("error: stray `!` in `%s`", infix)
 				}
 			}
+			if c != '!' {
+				if i > 0 && i < len(infix)-1 {
+					l := infix[i-1]
+					r := infix[i+1]
+					if !(l == ')' || (l >= 'A' && l <= 'Z')) ||
+						!(r == '(' || r == '!' || (r >= 'A' && r <= 'Z')) {
+						return "", fmt.Errorf("error: missing operand in `%s`", infix)
+					}
+				} else {
+					return "", fmt.Errorf("error: missing operand in `%s`", infix)
+				}
+			}
+
 			p := prec[c]
 			for len(op_stack) > 0 && ((prec[rune(op_stack[len(op_stack)-1])] > p) ||
 				((prec[rune(op_stack[len(op_stack)-1])] == p) && !right_assoc)) &&

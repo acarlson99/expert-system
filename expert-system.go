@@ -133,7 +133,7 @@ func Eval(prog *Facts, src string) {
 ?=(A | B)    Query expression
 reset A B    Reset variable rules
 list         List variables and rules
-exit         Exit program
+quit         Exit program
 help         Display help
 `)
 	case Reset:

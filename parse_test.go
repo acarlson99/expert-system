@@ -345,3 +345,48 @@ func Test24(t *testing.T) {
 		t.Errorf("err: %v", ret)
 	}
 }
+
+func Test25(t *testing.T) {
+	f := GetFacts()
+	f.HardReset()
+	ret, err := Parse("+AB=>C")
+	if err == nil {
+		t.Errorf("err: %v", ret)
+	}
+}
+
+func Test26(t *testing.T) {
+	f := GetFacts()
+	f.HardReset()
+	ret, err := Parse("AB+=>C")
+	if err == nil {
+		t.Errorf("err: %v", ret)
+	}
+}
+
+func Test27(t *testing.T) {
+	f := GetFacts()
+	f.HardReset()
+	ret, err := Parse("AB++=>C")
+	if err == nil {
+		t.Errorf("err: %v", ret)
+	}
+}
+
+func Test28(t *testing.T) {
+	f := GetFacts()
+	f.HardReset()
+	ret, err := Parse("A+B=>C+")
+	if err == nil {
+		t.Errorf("err: %v", ret)
+	}
+}
+
+func Test29(t *testing.T) {
+	f := GetFacts()
+	f.HardReset()
+	ret, err := Parse("A+B=>+C")
+	if err == nil {
+		t.Errorf("err: %v", ret)
+	}
+}
