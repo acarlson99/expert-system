@@ -111,7 +111,7 @@ func Eval(prog *Facts, src string) {
 		for _, r := range t {
 			prog.AddRule(byte(r.id), r.node)
 		}
-	case Exit:
+	case Quit:
 		os.Exit(0)
 	case List:
 		for i, f := range prog.f {
@@ -133,7 +133,7 @@ func Eval(prog *Facts, src string) {
 ?=(A | B)    Query expression
 reset A B    Reset variable rules
 list         List variables and rules
-quit         Exit program
+quit         Quit program
 help         Display help
 `)
 	case Reset:

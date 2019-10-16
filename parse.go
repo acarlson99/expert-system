@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type Exit struct{}
+type Quit struct{}
 type List struct{}
 type Vis struct {
 	args []string
@@ -36,7 +36,7 @@ func Parse(src string) (interface{}, error) {
 		verbose = verbose != true
 		fmt.Println("verbose =", verbose)
 	} else if src == "q" || src == "quit" {
-		return Exit{}, nil
+		return Quit{}, nil
 	} else if src == "l" || src == "ls" || src == "list" {
 		return List{}, nil
 	} else if len(src) >= len("vis") && src[:3] == "vis" {

@@ -53,7 +53,7 @@ go run github.com/acarlson99/expert-system
 | <code>?=(A &#124; B)</code> | Query expression         |
 | `reset A B`                 | Reset variable rules     |
 | `list`                      | List variables and rules |
-| `exit`                      | Exit program             |
+| `quit`                      | Quit program             |
 | `help`                      | Display help             |
 
 ![thing](./resources/rules.png)
