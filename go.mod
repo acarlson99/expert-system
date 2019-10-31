@@ -1,4 +1,4 @@
-module expert-system
+module github.com/acarlson99/expert-system
 
 go 1.13
 
