@@ -72,6 +72,7 @@ func (f *Facts) UserSet(cs []byte) {
 }
 
 func (f *Facts) UserQuery(cs []byte) []bool {
+	f.SoftReset()
 	res := []bool{}
 	for _, c := range cs {
 		if verbose {

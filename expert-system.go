@@ -132,6 +132,7 @@ func Eval(prog *Facts, src string) {
 ?AB          Query A and B
 ?=(A | B)    Query expression
 reset A B    Reset variable rules
+verbose      Turn on verbose output
 list         List variables and rules
 quit         Quit program
 help         Display help

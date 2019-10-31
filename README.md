@@ -1,6 +1,6 @@
 # Expert System
 
-A [backward chaining](https://en.wikipedia.org/wiki/Backward_chaining) [expert system](https://en.wikipedia.org/wiki/Expert_system) with rule visualizer
+An optimized [backward chaining](https://en.wikipedia.org/wiki/Backward_chaining) [expert system](https://en.wikipedia.org/wiki/Expert_system) with rule visualizer
 
 ## Dependencies
 
@@ -52,8 +52,11 @@ go run github.com/acarlson99/expert-system
 | `?AB`        | Query A and B            |
 | `?=(A \| B)` | Query expression         |
 | `reset A B`  | Reset variable rules     |
+| `verbose`    | Turn on verbose output   |
 | `list`       | List variables and rules |
 | `quit`       | Quit program             |
 | `help`       | Display help             |
+
+NOTE: recursive rules lead to undefined behavior due to optimizations and evaluation
 
 ![thing](./resources/rules.png)
