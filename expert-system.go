@@ -139,7 +139,11 @@ help         Display help
 	case Reset:
 		for _, c := range t.args {
 			if c >= 'A' && c <= 'Z' {
-				prog.f[int(byte(c))-int('A')].rule = nil
+				f := &prog.f[int(byte(c))-int('A')]
+				f.rule = nil
+				if !f.userdefined {
+					f.truth = false
+				}
 			}
 		}
 	case Vis:
