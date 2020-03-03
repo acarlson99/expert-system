@@ -134,6 +134,10 @@ func Eval(prog *Facts, src string) {
 reset A B    Reset variable rules
 verbose      Turn on verbose output
 list         List variables and rules
+vis [file]   Print graphviz system to stdout or optional file
+                 blue = user defined
+                 black = undefined
+                 green = true
 quit         Quit program
 help         Display help
 `)

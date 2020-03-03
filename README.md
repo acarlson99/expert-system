@@ -33,6 +33,8 @@ go run github.com/acarlson99/expert-system
 
 ## Syntax
 
+NOTE: recursive rules lead to undefined behavior due to evaluation optimizations
+
 ### Operators
 
 | Operator    | Example   |
@@ -46,17 +48,18 @@ go run github.com/acarlson99/expert-system
 
 ### Commands
 
-| Command      | Description              |
-| -            | -                        |
-| `=AB`        | Set A and B              |
-| `?AB`        | Query A and B            |
-| `?=(A \| B)` | Query expression         |
-| `reset A B`  | Reset variable rules     |
-| `verbose`    | Turn on verbose output   |
-| `list`       | List variables and rules |
-| `quit`       | Quit program             |
-| `help`       | Display help             |
+| Command      | Description                                      |
+| -            | -                                                |
+| `=AB`        | Set A and B                                      |
+| `?AB`        | Query A and B                                    |
+| `?=(A \| B)` | Query expression                                 |
+| `reset A B`  | Reset variable rules                             |
+| `verbose`    | Turn on verbose output                           |
+| `list`       | List variables and rules                         |
+| `vis [file]` | Print graphviz system to stdout or optional file |
+| `quit`       | Quit program                                     |
+| `help`       | Display help                                     |
 
-NOTE: recursive rules lead to undefined behavior due to optimizations and evaluation
+Key: blue = user defined, black = undefined, green = true
 
 ![thing](./resources/rules.png)
